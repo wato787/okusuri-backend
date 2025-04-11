@@ -3,8 +3,7 @@ package main
 import (
 	"okusuri-backend/config"
 	"okusuri-backend/migrations"
-
-	"github.com/gin-gonic/gin"
+	"okusuri-backend/routes"
 )
 
 func main() {
@@ -16,11 +15,7 @@ func main() {
 	migrations.RunMigrations(config.GetDB())
 
 	// Ginのルーターを作成
-	r := gin.Default()
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
-	})
-	r.Run() // 0.0.0.0:8080 でサーバーを立てます。
+	router := routes.SetupRoutes()
+
+	router.Run() // 0.0.0.0:8080 でサーバーを立てます。
 }
