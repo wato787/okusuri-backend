@@ -17,9 +17,9 @@ func main() {
 
 	// Ginのルーターを作成
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "pong",
+			"status": "ok",
 		})
 	})
 	r.Run() // 0.0.0.0:8080 でサーバーを立てます。
