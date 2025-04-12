@@ -10,6 +10,7 @@ func RegisterAuthRoutes(router *gin.RouterGroup, authController *controller.Auth
 	auth := router.Group("/auth")
 	{
 		auth.POST("/signup", authController.Signup)
+		auth.POST("/login", authController.Login)
 		// 認証が必要なルート
 		// authorized := auth.Group("/")
 		// authorized.Use(middleware.JWTAuth())
