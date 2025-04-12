@@ -1,9 +1,11 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
+	"okusuri-backend/helper"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Logger はリクエストのログを記録するミドルウェアです
@@ -43,15 +45,22 @@ func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
-		// TODO トークンの検証ロジックをここに実装
 		if token == "" {
 			c.JSON(401, gin.H{"error": "認証が必要です"})
 			c.Abort()
 			return
 		}
 
+		// トークンの検証
+		userId, err := helper.ValidateToken(token)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "無効なトークン"})
+			c.Abort()
+			return
+		}
+
 		// 検証が成功した場合、ユーザー情報をコンテキストに設定
-		// c.Set("userId", userId)
+		c.Set("userId", userId)
 
 		c.Next()
 	}

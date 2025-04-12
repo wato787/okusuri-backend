@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"okusuri-backend/dto"
+	"okusuri-backend/helper"
 	"okusuri-backend/repository"
 	"okusuri-backend/service"
 
@@ -40,7 +41,7 @@ func (ac *AuthController) Signup(c *gin.Context) {
 	}
 
 	// トークン生成処理
-	token, expiresAt, err := ac.authService.GenerateToken(user.ID)
+	token, expiresAt, err := helper.GenerateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "トークン生成に失敗しました"})
 		return
