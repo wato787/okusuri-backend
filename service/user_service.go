@@ -3,35 +3,22 @@ package service
 import (
 	"fmt"
 	"okusuri-backend/dto"
-	"okusuri-backend/helper"
 	"okusuri-backend/model"
 	"okusuri-backend/repository"
 )
 
-type AuthService struct {
+type UserService struct {
 	userRepo *repository.UserRepository
 }
 
-func NewAuthService(userRepo *repository.UserRepository) *AuthService {
-	return &AuthService{
+func NewUserService(userRepo *repository.UserRepository) *UserService {
+	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
-// TODO: user_servicenにする
-
-func (s *AuthService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
-	// IDトークンの検証
-	switch req.Provider {
-	case "google":
-		tokenInfo := helper.VerifyGoogleIDToken(req.IDToken)
-		if tokenInfo == nil {
-			return nil, fmt.Errorf("無効なIDトークン")
-		}
-		if tokenInfo.Email != req.Email {
-			return nil, fmt.Errorf("IDトークンのメールアドレスとリクエストのメールアドレスが一致しません")
-		}
-	}
+// ユーザーを登録する
+func (s *UserService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 
 	// ユーザーの存在確認
 	existingUser, err := s.userRepo.FindByProviderId(req.ProviderID)
@@ -59,4 +46,18 @@ func (s *AuthService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 
 	return newUser, nil
 
+}
+
+// ユーザーをプロバイダーIDで取得する
+func (s *UserService) GetUserByProviderId(providerId string) (*model.User, error) {
+	user, err := s.userRepo.FindByProviderId(providerId)
+	if err != nil {
+		return nil, fmt.Errorf("ユーザーの取得に失敗しました: %w", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("ユーザーが見つかりません")
+	}
+
+	return user, nil
 }
