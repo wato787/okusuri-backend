@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"okusuri-backend/config"
 	"okusuri-backend/dto"
 	"okusuri-backend/repository"
 	"okusuri-backend/service"
@@ -15,7 +16,7 @@ type AuthController struct {
 
 func NewAuthController() *AuthController {
 	userRepo := repository.NewUserRepository()
-	authService := service.NewAuthService(userRepo)
+	authService := service.NewAuthService(userRepo, &config.Config{})
 
 	return &AuthController{
 		authService: authService,
