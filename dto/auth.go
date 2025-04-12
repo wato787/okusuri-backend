@@ -12,10 +12,17 @@ type SignupRequest struct {
 	ProviderID string             `json:"provider_id" binding:"required"`
 }
 
-// AuthResponse は認証レスポンスのDTOを定義します
+// 認証レスポンスDTO
 type AuthResponse struct {
 	User      UserResponse `json:"user"`
 	Token     string       `json:"token"`
 	ExpiresAt int64        `json:"expires_at,omitempty"`
 	Message   string       `json:"message,omitempty"`
+}
+
+// ログインリクエストDTO
+type LoginRequest struct {
+	IDToken    string             `json:"id_token" binding:"required"`
+	Provider   model.AuthProvider `json:"provider" binding:"required,oneof=google"`
+	ProviderID string             `json:"provider_id" binding:"required"`
 }
