@@ -1,12 +1,15 @@
 package dto
 
+import "okusuri-backend/model"
+
 // 新規登録のリクエストDTO
 type SignupRequest struct {
-	IDToken    string `json:"id_token" binding:"required"`
-	Email      string `json:"email" binding:"required,email"`
-	Name       string `json:"name" binding:"required"`
-	ImageURL   string `json:"image_url"` // 任意フィールド
-	ProviderID string `json:"provider_id" binding:"required"`
+	IDToken    string             `json:"id_token" binding:"required"`
+	Email      string             `json:"email" binding:"required,email"`
+	Name       string             `json:"name" binding:"required"`
+	ImageURL   string             `json:"image_url"` // 任意フィールド
+	Provider   model.AuthProvider `json:"provider" binding:"required,oneof=google"`
+	ProviderID string             `json:"provider_id" binding:"required"`
 }
 
 // AuthResponse は認証レスポンスのDTOを定義します
