@@ -1,12 +1,16 @@
 package helper
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"google.golang.org/api/oauth2/v1"
+	"google.golang.org/api/option"
 )
 
 // JWTトークンを検証してユーザーIDを取得するメソッド
@@ -74,4 +78,20 @@ func GenerateToken(userID uint) (string, int64, error) {
 	}
 
 	return tokenString, expiresAt, nil
+}
+
+// GoogleのIDトークンを検証するメソッド
+func VerifyGoogleIDToken(idToken string) *oauth2.Tokeninfo {
+	httpClient := &http.Client{}
+	oauth2Service, err := oauth2.NewService(context.Background(), option.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil
+	}
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.IdToken(idToken)
+	tokenInfo, err := tokenInfoCall.Do()
+	if err != nil {
+		return nil
+	}
+	return tokenInfo
 }
