@@ -9,11 +9,10 @@ type SignupRequest struct {
 	ProviderID string `json:"provider_id" binding:"required"`
 }
 
-type SignupResponse struct {
-	UserID    uint   `json:"user_id"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	ImageURL  string `json:"image_url"`
-	Token     string `json:"token"`      // JWTアクセストークン
-	ExpiresAt int64  `json:"expires_at"` // トークンの有効期限（UNIXタイムスタンプ）
+// AuthResponse は認証レスポンスのDTOを定義します
+type AuthResponse struct {
+	User      UserResponse `json:"user"`
+	Token     string       `json:"token"`
+	ExpiresAt int64        `json:"expires_at,omitempty"`
+	Message   string       `json:"message,omitempty"`
 }
