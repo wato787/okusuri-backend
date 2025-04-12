@@ -18,6 +18,8 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 	}
 }
 
+// TODO: user_servicenにする
+
 func (s *AuthService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 	// IDトークンの検証
 	switch req.Provider {
