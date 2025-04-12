@@ -19,7 +19,6 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 }
 
 // ユーザーを登録する
-
 func (s *UserService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 	// IDトークンの検証
 	switch req.Provider {
