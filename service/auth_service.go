@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"okusuri-backend/dto"
 	"okusuri-backend/model"
 	"okusuri-backend/repository"
@@ -10,6 +12,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"google.golang.org/api/oauth2/v2"
+	"google.golang.org/api/option"
 )
 
 type AuthService struct {
@@ -24,6 +28,16 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 
 func (s *AuthService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 	// IDトークンの検証
+	switch req.Provider {
+	case "google":
+		tokenInfo := s.VerifyGoogleIDToken(req.IDToken)
+		if tokenInfo == nil {
+			return nil, fmt.Errorf("無効なIDトークン")
+		}
+		if tokenInfo.Email != req.Email {
+			return nil, fmt.Errorf("IDトークンのメールアドレスとリクエストのメールアドレスが一致しません")
+		}
+	}
 
 	// ユーザーの存在確認
 	existingUser, err := s.userRepo.FindByProviderId(req.ProviderID)
@@ -85,4 +99,20 @@ func (s *AuthService) GenerateToken(userID uint) (string, int64, error) {
 	}
 
 	return tokenString, expiresAt, nil
+}
+
+// GoogleのIDトークンを検証するメソッド
+func (s *AuthService) VerifyGoogleIDToken(idToken string) *oauth2.Tokeninfo {
+	httpClient := &http.Client{}
+	oauth2Service, err := oauth2.NewService(context.Background(), option.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil
+	}
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.IdToken(idToken)
+	tokenInfo, err := tokenInfoCall.Do()
+	if err != nil {
+		return nil
+	}
+	return tokenInfo
 }
