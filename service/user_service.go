@@ -8,19 +8,19 @@ import (
 	"okusuri-backend/repository"
 )
 
-type AuthService struct {
+type UserService struct {
 	userRepo *repository.UserRepository
 }
 
-func NewAuthService(userRepo *repository.UserRepository) *AuthService {
-	return &AuthService{
+func NewUserService(userRepo *repository.UserRepository) *UserService {
+	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
-// TODO: user_servicenにする
+// ユーザーを登録する
 
-func (s *AuthService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
+func (s *UserService) RegisterUser(req dto.SignupRequest) (*model.User, error) {
 	// IDトークンの検証
 	switch req.Provider {
 	case "google":

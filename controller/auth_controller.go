@@ -11,15 +11,15 @@ import (
 )
 
 type AuthController struct {
-	authService *service.AuthService
+	userService *service.UserService
 }
 
 func NewAuthController() *AuthController {
 	userRepo := repository.NewUserRepository()
-	authService := service.NewAuthService(userRepo)
+	userService := service.NewUserService(userRepo)
 
 	return &AuthController{
-		authService: authService,
+		userService: userService,
 	}
 }
 
@@ -31,7 +31,7 @@ func (ac *AuthController) Signup(c *gin.Context) {
 	}
 
 	// ユーザー登録処理
-	user, err := ac.authService.RegisterUser(req)
+	user, err := ac.userService.RegisterUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ユーザー登録に失敗しました"})
 		return
