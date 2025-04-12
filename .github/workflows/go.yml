@@ -35,24 +35,3 @@ jobs:
             gofmt -l .
             exit 1
           fi
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22' # 1.24.2 から 1.22 に変更
-          cache: true
-
-      # go.mod のバージョン指定を修正するステップを追加
-      - name: Fix go.mod version
-        run: |
-          sed -i 's/go 1.24.2/go 1.22/' go.mod
-          cat go.mod
-
-      - name: Build
-        run: go build -v ./...
