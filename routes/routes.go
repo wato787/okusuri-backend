@@ -1,15 +1,12 @@
 package routes
 
 import (
-	"okusuri-backend/controller"
 	"okusuri-backend/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes() *gin.Engine {
-	// コントローラを初期化
-	authController := controller.NewAuthController()
 
 	// Ginのルーターを作成
 	router := gin.Default()
@@ -25,9 +22,6 @@ func SetupRoutes() *gin.Engine {
 				"status": "ok",
 			})
 		})
-
-		// 認証ルートの登録
-		RegisterAuthRoutes(api, authController)
 
 		// 認証が必要なルートグループ
 		secured := api.Group("/")
