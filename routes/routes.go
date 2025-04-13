@@ -24,8 +24,8 @@ func SetupRoutes() *gin.Engine {
 		})
 
 		// 認証が必要なルートグループ
-		secured := api.Group("/")
-		secured.Use(middleware.JWTAuth())
+		// secured := api.Group("/")
+		// secured.Use(middleware.JWTAuth())
 		{
 			// ここに認証が必要なルートを追加
 			// 例: RegisterUserRoutes(secured, userController)
