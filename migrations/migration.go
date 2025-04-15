@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"log"
+	"okusuri-backend/model"
 
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ func RunMigrations(db *gorm.DB) {
 	log.Println("マイグレーションを実行します...")
 
 	// // マイグレーション対象のモデルをここに追加
-	err := db.AutoMigrate()
+	err := db.AutoMigrate(&model.NotificationSetting{})
 	if err != nil {
 		log.Fatalf("マイグレーションに失敗しました: %v", err)
 	}
