@@ -34,3 +34,15 @@ func (r *NotificationRepository) RegisterNotificationSetting(notificationSetting
 
 	return nil
 }
+
+func (r *NotificationRepository) GetAllNotificationSettings() ([]model.NotificationSetting, error) {
+	// DB接続
+	db := config.DB
+
+	var notificationSettings []model.NotificationSetting
+	if err := db.Find(&notificationSettings).Error; err != nil {
+		return nil, err
+	}
+
+	return notificationSettings, nil
+}
