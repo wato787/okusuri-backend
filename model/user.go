@@ -13,16 +13,24 @@ type User struct {
 	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
+func (User) TableName() string {
+	return "user"
+}
+
 // Session モデル
 type Session struct {
-	ID        string    `json:"id" gorm:"primary_key"`
-	ExpiresAt time.Time `json:"expiresAt"`
-	Token     string    `json:"token" gorm:"unique"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	IPAddress *string   `json:"ipAddress"`
-	UserAgent *string   `json:"userAgent"`
-	UserID    string    `json:"userId"`
+	ID        string    `json:"id" gorm:"primary_key;column:id"`
+	ExpiresAt time.Time `json:"expiresAt" gorm:"column:expiresAt"`
+	Token     string    `json:"token" gorm:"unique;column:token"`
+	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	IPAddress *string   `json:"ipAddress" gorm:"column:ipAddress"`
+	UserAgent *string   `json:"userAgent" gorm:"column:userAgent"`
+	UserID    string    `json:"userId" gorm:"column:userId"`
+}
+
+func (Session) TableName() string {
+	return "session"
 }
 
 // Account モデル
@@ -42,6 +50,10 @@ type Account struct {
 	UpdatedAt             time.Time  `json:"updatedAt"`
 }
 
+func (Account) TableName() string {
+	return "account"
+}
+
 // Verification モデル
 type Verification struct {
 	ID         string     `json:"id" gorm:"primary_key"`
@@ -50,4 +62,8 @@ type Verification struct {
 	ExpiresAt  time.Time  `json:"expiresAt"`
 	CreatedAt  *time.Time `json:"createdAt"`
 	UpdatedAt  *time.Time `json:"updatedAt"`
+}
+
+func (Verification) TableName() string {
+	return "verification"
 }
