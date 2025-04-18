@@ -25,3 +25,12 @@ func (s *NotificationService) GetNotificationSettingByUserID(userID string) (*mo
 
 	return notificationSetting, nil
 }
+
+func (s *NotificationService) RegisterNotificationSetting(notificationSetting *model.NotificationSetting) error {
+	err := s.NotificationRepository.RegisterNotificationSetting(notificationSetting)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -23,3 +23,14 @@ func (r *NotificationRepository) GetNotificationSettingByUserID(userID string) (
 
 	return &notificationSetting, nil
 }
+
+func (r *NotificationRepository) RegisterNotificationSetting(notificationSetting *model.NotificationSetting) error {
+	// DB接続
+	db := config.DB
+
+	if err := db.Create(notificationSetting).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
