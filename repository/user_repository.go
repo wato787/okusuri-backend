@@ -31,3 +31,15 @@ func (r *UserRepository) GetUserByToken(token string) (*model.User, error) {
 
 	return &user, nil
 }
+
+func (r *UserRepository) GetAllUsers() ([]model.User, error) {
+	db := config.DB
+	var users []model.User
+
+	// ユーザーを取得
+	if err := db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
