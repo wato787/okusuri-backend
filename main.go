@@ -15,6 +15,11 @@ func main() {
 	// マイグレーションの実行
 	migrations.RunMigrations(config.GetDB())
 
+	// firebaseの初期化
+	if err := config.InitFirebase(); err != nil {
+		log.Fatalf("Firebaseの初期化に失敗しました: %v", err)
+	}
+
 	// Ginのルーターを作成
 	router := routes.SetupRoutes()
 
