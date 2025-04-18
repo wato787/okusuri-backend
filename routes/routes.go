@@ -31,13 +31,12 @@ func SetupRoutes() *gin.Engine {
 			})
 		})
 
-		// 認証が必要なルートグループ
-		secured := api.Group("/")
-		secured.Use(middleware.Auth(userRepository))
-		{
-			// ここに認証が必要なルートを追加
-			RegisterNotificationRoutes(secured, notificationController)
-		}
+		api.POST(("/notification"), notificationController.SendNotification)
+
+		notificationSetting := api.Group("/notification/setting")
+		notificationSetting.Use(middleware.Auth(userRepository))
+		notificationSetting.GET("/", notificationController.GetNotificationSetting)
+		notificationSetting.POST("/", notificationController.RegisterNotificationSetting)
 	}
 
 	return router
