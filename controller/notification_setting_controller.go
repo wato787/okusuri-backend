@@ -25,7 +25,7 @@ func NewNotificationController() *NotificationController {
 	}
 }
 
-func (nc *NotificationController) RegisterNotificationSetting(c *gin.Context) {
+func (nc *NotificationController) GetNotificationSetting(c *gin.Context) {
 	// ユーザーIDを取得
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {

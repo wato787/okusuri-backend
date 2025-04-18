@@ -7,12 +7,10 @@ import (
 
 type NotificationRepository struct{}
 
-// NewNotificationRepository は新しいNotificationRepositoryのインスタンスを作成する
 func NewNotificationRepository() *NotificationRepository {
 	return &NotificationRepository{}
 }
 
-// GetNotificationSettingByUserID はユーザーIDに基づいて通知設定を取得する
 func (r *NotificationRepository) GetNotificationSettingByUserID(userID string) (*model.NotificationSetting, error) {
 	// DB接続
 	db := config.DB
