@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 )
