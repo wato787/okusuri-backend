@@ -21,7 +21,7 @@ func InitFirebase() error {
 	credentialPath := os.Getenv("FIREBASE_CREDENTIAL_PATH")
 	if credentialPath == "" {
 		// 環境変数が設定されていない場合、デフォルトパスを使用
-		credentialPath = filepath.Join("config", "firebase-service-account.json")
+		credentialPath = filepath.Join("config", "./firebase-service-account.json")
 	}
 
 	// サービスアカウントのJSONファイルパスを指定
