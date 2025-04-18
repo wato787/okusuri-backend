@@ -13,7 +13,7 @@ func NewNotificationRepository() *NotificationRepository {
 }
 
 // GetNotificationSettingByUserID はユーザーIDに基づいて通知設定を取得する
-func (r *NotificationRepository) GetNotificationSettingByUserID(userID int) (*model.NotificationSetting, error) {
+func (r *NotificationRepository) GetNotificationSettingByUserID(userID string) (*model.NotificationSetting, error) {
 	// DB接続
 	db := config.DB
 
