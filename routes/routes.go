@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"okusuri-backend/controller"
 	"okusuri-backend/middleware"
 	"okusuri-backend/repository"
 
@@ -8,6 +9,9 @@ import (
 )
 
 func SetupRoutes() *gin.Engine {
+
+	// controllerを初期化
+	notificationController := controller.NewNotificationController()
 
 	// userRepositoryを初期化
 	userRepository := repository.NewUserRepository()
@@ -32,7 +36,7 @@ func SetupRoutes() *gin.Engine {
 		secured.Use(middleware.Auth(userRepository))
 		{
 			// ここに認証が必要なルートを追加
-			// 例: RegisterUserRoutes(secured, userController)
+			RegisterNotificationRoutes(secured, notificationController)
 		}
 	}
 
