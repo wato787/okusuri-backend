@@ -1,0 +1,34 @@
+# リトライ機能付きバージョン
+name: Daily Medication Notification with Retry
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send notification with retry
+        run: |
+          max_attempts=3
+          attempt=1
+
+          while [ $attempt -le $max_attempts ]; do
+            response=$(curl -s -w "\n%{http_code}" -X POST https://okusuri-backend.onrender.com/api/notification)
+            http_code=$(echo "$response" | tail -n1)
+            
+            if [ "$http_code" -eq 200 ]; then
+              echo "Success on attempt $attempt"
+              exit 0
+            else
+              echo "Attempt $attempt failed with status $http_code"
+              sleep 60  # 60秒待機
+              attempt=$((attempt + 1))
+            fi
+          done
+
+          echo "All $max_attempts attempts failed"
+          exit 1
