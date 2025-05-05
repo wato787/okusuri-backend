@@ -16,6 +16,7 @@ func NewMedicationLogService(medicationLogRepository *repository.MedicationLogRe
 		MedicationLogRepository: medicationLogRepository,
 	}
 }
+
 func (s *MedicationLogService) RegisterMedicationLog(userID string, medicationLog model.MedicationLog) error {
 	// 服用履歴を登録
 	err := s.MedicationLogRepository.RegisterMedicationLog(userID, medicationLog)
@@ -24,4 +25,14 @@ func (s *MedicationLogService) RegisterMedicationLog(userID string, medicationLo
 	}
 
 	return nil
+}
+
+func (s *MedicationLogService) GetMedicationLogsByUserID(userID string) ([]model.MedicationLog, error) {
+	// ユーザーIDに基づいて服用履歴を取得
+	medicationLogs, err := s.MedicationLogRepository.GetMedicationLogsByUserID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get medication logs: %w", err)
+	}
+
+	return medicationLogs, nil
 }
