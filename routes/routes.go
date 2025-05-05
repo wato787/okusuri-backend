@@ -12,6 +12,7 @@ func SetupRoutes() *gin.Engine {
 
 	// controllerを初期化
 	notificationController := controller.NewNotificationController()
+	medicationLogController := controller.NewMedicationLogController()
 
 	// userRepositoryを初期化
 	userRepository := repository.NewUserRepository()
@@ -37,6 +38,11 @@ func SetupRoutes() *gin.Engine {
 		notificationSetting.Use(middleware.Auth(userRepository))
 		notificationSetting.GET("/", notificationController.GetNotificationSetting)
 		notificationSetting.POST("/", notificationController.RegisterNotificationSetting)
+
+		medicationLog := api.Group("/medication-log")
+		medicationLog.Use(middleware.Auth(userRepository))
+		medicationLog.POST("/", medicationLogController.RegisterMedicationLog)
+		medicationLog.GET("/", medicationLogController.GetMedicationLogs)
 	}
 
 	return router
