@@ -21,3 +21,16 @@ func (r *MedicationLogRepository) RegisterMedicationLog(userID string, medicatio
 
 	return nil
 }
+
+func (r *MedicationLogRepository) GetMedicationLogsByUserID(userID string) ([]model.MedicationLog, error) {
+	// DB接続
+	db := config.DB
+
+	// ユーザーIDに基づいて服用履歴を取得
+	var medicationLogs []model.MedicationLog
+	if err := db.Where("user_id = ?", userID).Find(&medicationLogs).Error; err != nil {
+		return nil, err
+	}
+
+	return medicationLogs, nil
+}
