@@ -55,3 +55,21 @@ func (mc *MedicationLogController) RegisterMedicationLog(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "medication log registered successfully"})
 }
+
+func (mc *MedicationLogController) GetMedicationLogs(c *gin.Context) {
+	// ユーザーIDを取得
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// MedicationLogを取得
+	medicationLogs, err := mc.MedicationLogService.GetMedicationLogsByUserID(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get medication logs"})
+		return
+	}
+
+	c.JSON(http.StatusOK, medicationLogs)
+}
