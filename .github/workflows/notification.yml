@@ -25,7 +25,7 @@ jobs:
               exit 0
             else
               echo "Attempt $attempt failed with status $http_code"
-              sleep 60  # 60秒待機
+              sleep 10  # 10秒待機
               attempt=$((attempt + 1))
             fi
           done
