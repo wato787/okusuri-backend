@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
-	"okusuri-backend/config"
+
 	"okusuri-backend/migrations"
+	"okusuri-backend/pkg/config"
 	"okusuri-backend/routes"
 )
 
