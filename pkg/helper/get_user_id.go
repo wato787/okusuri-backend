@@ -2,7 +2,7 @@ package helper
 
 import (
 	"errors"
-	"okusuri-backend/internal/common/model"
+	"okusuri-backend/internal/common/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +13,7 @@ func GetUserIDFromContext(c *gin.Context) (string, error) {
 		return "", errors.New("ユーザー情報がコンテキストに存在しません")
 	}
 
-	user, ok := userInterface.(*model.User)
+	user, ok := userInterface.(*user.User)
 	if !ok {
 		return "", errors.New("ユーザー情報の型変換に失敗しました")
 	}
