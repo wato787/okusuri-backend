@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"okusuri-backend/config"
 	"okusuri-backend/model"
+	"okusuri-backend/pkg/config"
 )
 
 type NotificationRepository struct{}

@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"okusuri-backend/config"
+
 	"okusuri-backend/model"
+	"okusuri-backend/pkg/config"
 	"okusuri-backend/repository"
 
 	"firebase.google.com/go/v4/messaging"
