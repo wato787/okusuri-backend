@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"okusuri-backend/controller"
 	"okusuri-backend/internal/api/medication"
+	"okusuri-backend/internal/api/notification"
 	"okusuri-backend/internal/common/user"
 	"okusuri-backend/internal/middleware"
 
@@ -11,12 +11,11 @@ import (
 
 func SetupRoutes() *gin.Engine {
 
-	// controllerを初期化
-	notificationController := controller.NewNotificationController()
+	notificationHandler := notification.NewHandler()
 	medicationLogHandler := medication.NewHandler()
 
 	// userRepositoryを初期化
-	userRepository := user.NewUserRepository()
+	userRepository := user.NewRepository()
 
 	// Ginのルーターを作成
 	router := gin.Default()
@@ -33,12 +32,12 @@ func SetupRoutes() *gin.Engine {
 			})
 		})
 
-		api.POST(("/notification"), notificationController.SendNotification)
+		api.POST(("/notification"), notificationHandler.SendNotification)
 
 		notificationSetting := api.Group("/notification/setting")
 		notificationSetting.Use(middleware.Auth(userRepository))
-		notificationSetting.GET("/", notificationController.GetNotificationSetting)
-		notificationSetting.POST("/", notificationController.RegisterNotificationSetting)
+		notificationSetting.GET("/", notificationHandler.GetSetting)
+		notificationSetting.POST("/", notificationHandler.RegisterSetting)
 
 		medicationLog := api.Group("/medication-log")
 		medicationLog.Use(middleware.Auth(userRepository))

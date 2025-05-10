@@ -3,6 +3,7 @@ package notification
 import (
 	"net/http"
 	"okusuri-backend/internal/common/user"
+	"okusuri-backend/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,14 +55,14 @@ func (h *Handler) RegisterSetting(c *gin.Context) {
 	}
 
 	// リクエストボディから通知設定を取得
-	var req RegisterRequest
+	var req RegisterNotificationSettingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
 	// 通知設定をモデルに変換
-	setting := Setting{
+	setting := NotificationSetting{
 		UserID:    userID,
 		IsEnabled: req.IsEnabled,
 		FcmToken:  req.FcmToken,
@@ -94,7 +95,7 @@ func (h *Handler) SendNotification(c *gin.Context) {
 	}
 
 	// 通知設定をユーザーに紐づける
-	settingsMap := make(map[string]Setting)
+	settingsMap := make(map[string]NotificationSetting)
 	for _, setting := range settings {
 		settingsMap[setting.UserID] = setting
 	}
