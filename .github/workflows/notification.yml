@@ -3,7 +3,7 @@ name: Daily Medication Notification with Retry
 
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '50 11 * * *'
   workflow_dispatch:
 
 jobs:
