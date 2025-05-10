@@ -35,15 +35,15 @@ func SetupRoutes() *gin.Engine {
 		api.POST(("/notification"), notificationHandler.SendNotification)
 
 		notificationSetting := api.Group("/notification/setting")
+		notificationSetting.Use(middleware.Auth(userRepository))
 		{
-			notificationSetting.Use(middleware.Auth(userRepository))
 			notificationSetting.GET("", notificationHandler.GetSetting)
 			notificationSetting.POST("", notificationHandler.RegisterSetting)
 		}
 
 		medicationLog := api.Group("/medication-log")
+		medicationLog.Use(middleware.Auth(userRepository))
 		{
-			medicationLog.Use(middleware.Auth(userRepository))
 			medicationLog.POST("", medicationLogHandler.RegisterLog)
 			medicationLog.GET("", medicationLogHandler.GetLogs)
 		}
