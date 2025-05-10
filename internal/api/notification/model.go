@@ -1,15 +1,19 @@
 package notification
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // ユーザーのFCM通知設定を管理する構造体
 type NotificationSetting struct {
-	ID        uint       `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time  `json:"createdAt"`                        // 作成時に自動設定される
-	UpdatedAt time.Time  `json:"updatedAt"`                        // 更新時に自動設定される
-	DeletedAt *time.Time `json:"deletedAt,omitempty" gorm:"index"` // ソフトデリート用
-	UserID    string     `json:"userId" gorm:"not null;uniqueIndex:idx_user_id"`
-	IsEnabled bool       `json:"isEnabled" gorm:"default:true"`
-	FcmToken  string     `json:"fcmToken" gorm:"not null;uniqueIndex:idx_fcm_token"`
-	Platform  string     `json:"platform" gorm:"not null"`
+	ID        uint           `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index"` // gorm.DeletedAtに変更
+	UserID    string         `json:"userId" gorm:"not null;index:idx_user_platform,unique:true,part:1"`
+	Platform  string         `json:"platform" gorm:"not null;index:idx_user_platform,unique:true,part:2"`
+	IsEnabled bool           `json:"isEnabled" gorm:"default:true"`
+	FcmToken  string         `json:"fcmToken" gorm:"not null"`
 }
