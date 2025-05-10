@@ -2,7 +2,7 @@ package helper
 
 import (
 	"errors"
-	"okusuri-backend/model"
+	"okusuri-backend/internal/common/model"
 
 	"github.com/gin-gonic/gin"
 )
