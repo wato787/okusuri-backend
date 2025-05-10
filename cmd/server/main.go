@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"okusuri-backend/internal/routes"
+	routes "okusuri-backend/internal"
 	"okusuri-backend/migrations"
 	"okusuri-backend/pkg/config"
 )
