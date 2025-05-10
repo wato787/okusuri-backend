@@ -11,5 +11,5 @@ type NotificationSetting struct {
 	UserID    string     `json:"userId" gorm:"not null;uniqueIndex:idx_user_id"`
 	IsEnabled bool       `json:"isEnabled" gorm:"default:true"`
 	FcmToken  string     `json:"fcmToken" gorm:"not null;uniqueIndex:idx_fcm_token"`
-	Platform  string     `json:"platform" gorm:"not null;uniqueIndex:idx_platform"`
+	Platform  string     `json:"platform" gorm:"not null"`
 }
