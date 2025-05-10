@@ -4,16 +4,14 @@ import (
 	"okusuri-backend/pkg/config"
 )
 
-// UserRepository はユーザーデータへのアクセスを提供する
-type UserRepository struct{}
+type Repository struct{}
 
-// NewUserRepository は新しいUserRepositoryのインスタンスを作成する
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
+func NewRepository() *Repository {
+	return &Repository{}
 }
 
 // tokenからユーザー情報を取得する
-func (r *UserRepository) GetUserByToken(token string) (*User, error) {
+func (r *Repository) GetUserByToken(token string) (*User, error) {
 	db := config.DB
 	var user User
 	var session Session
@@ -31,7 +29,7 @@ func (r *UserRepository) GetUserByToken(token string) (*User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) GetAllUsers() ([]User, error) {
+func (r *Repository) GetAllUsers() ([]User, error) {
 	db := config.DB
 	var users []User
 

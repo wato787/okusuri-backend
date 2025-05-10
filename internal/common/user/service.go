@@ -1,20 +1,19 @@
 package user
 
-type UserService struct {
-	// UserRepository ユーザーデータへのアクセスを提供するリポジトリ
-	UserRepository *UserRepository
+type Service struct {
+	Repository *Repository
 }
 
 // NewUserService は新しいUserServiceのインスタンスを作成する
-func NewUserService(userRepository *UserRepository) *UserService {
-	return &UserService{
-		UserRepository: userRepository,
+func NewService(repository *Repository) *Service {
+	return &Service{
+		Repository: repository,
 	}
 }
 
 // GetAllUsers は全ユーザー情報を取得する
-func (us *UserService) GetAllUsers() ([]User, error) {
-	users, err := us.UserRepository.GetAllUsers()
+func (us *Service) GetAllUsers() ([]User, error) {
+	users, err := us.Repository.GetAllUsers()
 	if err != nil {
 		return nil, err
 	}
