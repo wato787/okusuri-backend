@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
+	"okusuri-backend/internal/routes"
 	"okusuri-backend/migrations"
 	"okusuri-backend/pkg/config"
-	"okusuri-backend/routes"
 )
 
 func main() {

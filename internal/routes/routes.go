@@ -2,7 +2,7 @@ package routes
 
 import (
 	"okusuri-backend/controller"
-	"okusuri-backend/middleware"
+	"okusuri-backend/internal/middleware"
 	"okusuri-backend/repository"
 
 	"github.com/gin-gonic/gin"
