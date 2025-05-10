@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"okusuri-backend/internal/common/user"
 	"okusuri-backend/pkg/config"
-	"time"
 
 	"firebase.google.com/go/v4/messaging"
 )
@@ -65,18 +64,11 @@ func (s *Service) SendNotification(user user.User, setting NotificationSetting, 
 			return fmt.Errorf("FCMクライアント取得エラー: %v", err)
 		}
 
-		// 一意のメッセージIDを生成（オプション）
-		messageID := fmt.Sprintf("msg-%d", time.Now().UnixNano())
-
 		// 通知メッセージの作成
 		msg := &messaging.Message{
 			Notification: &messaging.Notification{
 				Title: "通知",
 				Body:  message,
-			},
-			Data: map[string]string{
-				"messageID": messageID,
-				"timestamp": time.Now().Format(time.RFC3339),
 			},
 			Token: setting.FcmToken,
 		}
