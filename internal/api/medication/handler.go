@@ -8,19 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler は薬の服用記録に関するHTTPハンドラー
 type Handler struct {
 	service *Service
 }
 
-// NewHandler は新しいHandler インスタンスを作成する
-func NewHandler(service *Service) *Handler {
+func NewHandler() *Handler {
+	repository := NewRepository()
 	return &Handler{
-		service: service,
+		service: NewService(repository),
 	}
 }
 
-// RegisterLog は服用記録を登録するハンドラー
 func (h *Handler) RegisterLog(c *gin.Context) {
 	// ユーザーIDを取得
 	userID, err := helper.GetUserIDFromContext(c)

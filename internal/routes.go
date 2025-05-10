@@ -2,6 +2,7 @@ package routes
 
 import (
 	"okusuri-backend/controller"
+	"okusuri-backend/internal/api/medication"
 	"okusuri-backend/internal/common/user"
 	"okusuri-backend/internal/middleware"
 
@@ -12,7 +13,7 @@ func SetupRoutes() *gin.Engine {
 
 	// controllerを初期化
 	notificationController := controller.NewNotificationController()
-	medicationLogController := controller.NewMedicationLogController()
+	medicationLogHandler := medication.NewHandler()
 
 	// userRepositoryを初期化
 	userRepository := user.NewUserRepository()
@@ -41,8 +42,8 @@ func SetupRoutes() *gin.Engine {
 
 		medicationLog := api.Group("/medication-log")
 		medicationLog.Use(middleware.Auth(userRepository))
-		medicationLog.POST("/", medicationLogController.RegisterMedicationLog)
-		medicationLog.GET("/", medicationLogController.GetMedicationLogs)
+		medicationLog.POST("/", medicationLogHandler.RegisterLog)
+		medicationLog.GET("/", medicationLogHandler.GetLogs)
 	}
 
 	return router
