@@ -1,4 +1,4 @@
-package dto
+package medication
 
 // 服用記録リクエスト
 type MedicationLogRequest struct {

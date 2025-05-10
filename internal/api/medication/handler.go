@@ -2,7 +2,7 @@ package medication
 
 import (
 	"net/http"
-	"okusuri-backend/dto"
+
 	"okusuri-backend/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +32,7 @@ func (mc *MedicationLogController) RegisterMedicationLog(c *gin.Context) {
 	}
 
 	// リクエストボディを構造体にバインド
-	var req dto.MedicationLogRequest
+	var req MedicationLogRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
