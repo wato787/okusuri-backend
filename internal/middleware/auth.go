@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"okusuri-backend/repository"
+	"okusuri-backend/internal/common/user"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Auth(userRepository *repository.UserRepository) gin.HandlerFunc {
+func Auth(userRepository *user.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Bearerトークンを取得
 		authHeader := c.Request.Header.Get("Authorization")

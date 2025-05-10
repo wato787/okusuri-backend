@@ -2,8 +2,8 @@ package routes
 
 import (
 	"okusuri-backend/controller"
+	"okusuri-backend/internal/common/user"
 	"okusuri-backend/internal/middleware"
-	"okusuri-backend/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +15,7 @@ func SetupRoutes() *gin.Engine {
 	medicationLogController := controller.NewMedicationLogController()
 
 	// userRepositoryを初期化
-	userRepository := repository.NewUserRepository()
+	userRepository := user.NewUserRepository()
 
 	// Ginのルーターを作成
 	router := gin.Default()
