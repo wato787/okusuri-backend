@@ -8,22 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MedicationLogController struct {
-	MedicationLogRepository *MedicationLogRepository
-	MedicationLogService    *MedicationLogService
+// Handler は薬の服用記録に関するHTTPハンドラー
+type Handler struct {
+	service *Service
 }
 
-// NewMedicationLogController は新しいMedicationLogControllerのインスタンスを作成する
-func NewMedicationLogController() *MedicationLogController {
-	medicationLogRepository := NewMedicationLogRepository()
-	medicationLogService := NewMedicationLogService(medicationLogRepository)
-	return &MedicationLogController{
-		MedicationLogRepository: medicationLogRepository,
-		MedicationLogService:    medicationLogService,
+// NewHandler は新しいHandler インスタンスを作成する
+func NewHandler(service *Service) *Handler {
+	return &Handler{
+		service: service,
 	}
 }
 
-func (mc *MedicationLogController) RegisterMedicationLog(c *gin.Context) {
+// RegisterLog は服用記録を登録するハンドラー
+func (h *Handler) RegisterLog(c *gin.Context) {
 	// ユーザーIDを取得
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -43,8 +41,8 @@ func (mc *MedicationLogController) RegisterMedicationLog(c *gin.Context) {
 		HasBleeding: req.HasBleeding,
 	}
 
-	// MedicationLogを作成
-	err = mc.MedicationLogService.RegisterMedicationLog(userID, medicationLog)
+	// 服用記録を作成
+	err = h.service.RegisterLog(userID, medicationLog)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register medication log"})
 		return
@@ -53,7 +51,8 @@ func (mc *MedicationLogController) RegisterMedicationLog(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "medication log registered successfully"})
 }
 
-func (mc *MedicationLogController) GetMedicationLogs(c *gin.Context) {
+// GetLogs はユーザーの服用記録を取得するハンドラー
+func (h *Handler) GetLogs(c *gin.Context) {
 	// ユーザーIDを取得
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -61,12 +60,12 @@ func (mc *MedicationLogController) GetMedicationLogs(c *gin.Context) {
 		return
 	}
 
-	// MedicationLogを取得
-	medicationLogs, err := mc.MedicationLogService.GetMedicationLogsByUserID(userID)
+	// 服用記録を取得
+	logs, err := h.service.GetLogsByUserID(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get medication logs"})
 		return
 	}
 
-	c.JSON(http.StatusOK, medicationLogs)
+	c.JSON(http.StatusOK, logs)
 }

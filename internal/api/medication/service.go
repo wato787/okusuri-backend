@@ -4,20 +4,22 @@ import (
 	"fmt"
 )
 
-type MedicationLogService struct {
-	MedicationLogRepository *MedicationLogRepository
+// Service は薬の服用記録に関するビジネスロジックを提供する
+type Service struct {
+	repository Repository
 }
 
-// NewMedicationLogService は新しいMedicationLogServiceのインスタンスを作成する
-func NewMedicationLogService(medicationLogRepository *MedicationLogRepository) *MedicationLogService {
-	return &MedicationLogService{
-		MedicationLogRepository: medicationLogRepository,
+// NewService は新しいServiceインスタンスを作成する
+func NewService(repository Repository) *Service {
+	return &Service{
+		repository: repository,
 	}
 }
 
-func (s *MedicationLogService) RegisterMedicationLog(userID string, medicationLog MedicationLog) error {
+// RegisterLog は服用記録を登録する
+func (s *Service) RegisterLog(userID string, log MedicationLog) error {
 	// 服用履歴を登録
-	err := s.MedicationLogRepository.RegisterMedicationLog(userID, medicationLog)
+	err := s.repository.RegisterLog(userID, log)
 	if err != nil {
 		return fmt.Errorf("failed to register medication log: %w", err)
 	}
@@ -25,12 +27,13 @@ func (s *MedicationLogService) RegisterMedicationLog(userID string, medicationLo
 	return nil
 }
 
-func (s *MedicationLogService) GetMedicationLogsByUserID(userID string) ([]MedicationLog, error) {
+// GetLogsByUserID はユーザーIDに基づいて服用履歴を取得する
+func (s *Service) GetLogsByUserID(userID string) ([]MedicationLog, error) {
 	// ユーザーIDに基づいて服用履歴を取得
-	medicationLogs, err := s.MedicationLogRepository.GetMedicationLogsByUserID(userID)
+	logs, err := s.repository.GetLogsByUserID(userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get medication logs: %w", err)
 	}
 
-	return medicationLogs, nil
+	return logs, nil
 }
