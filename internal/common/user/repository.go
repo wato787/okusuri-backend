@@ -1,7 +1,6 @@
-package repository
+package user
 
 import (
-	"okusuri-backend/model"
 	"okusuri-backend/pkg/config"
 )
 
@@ -14,10 +13,10 @@ func NewUserRepository() *UserRepository {
 }
 
 // tokenからユーザー情報を取得する
-func (r *UserRepository) GetUserByToken(token string) (*model.User, error) {
+func (r *UserRepository) GetUserByToken(token string) (*User, error) {
 	db := config.DB
-	var user model.User
-	var session model.Session
+	var user User
+	var session Session
 
 	// セッションを取得
 	if err := db.Where("token = ?", token).First(&session).Error; err != nil {
@@ -32,9 +31,9 @@ func (r *UserRepository) GetUserByToken(token string) (*model.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) GetAllUsers() ([]model.User, error) {
+func (r *UserRepository) GetAllUsers() ([]User, error) {
 	db := config.DB
-	var users []model.User
+	var users []User
 
 	// ユーザーを取得
 	if err := db.Find(&users).Error; err != nil {
