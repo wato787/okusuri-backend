@@ -2,27 +2,26 @@ package notification
 
 import (
 	"net/http"
-	"okusuri-backend/internal/common/user"
+	"okusuri-backend/internal/repository"
 	"okusuri-backend/pkg/helper"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	service     *Service
-	userService *user.Service
+	service        *Service
+	userRepository *repository.UserRepository
 }
 
 // NewHandler は通知ハンドラーの新しいインスタンスを作成する
 func NewHandler() *Handler {
-	repository := NewRepository()
-	service := NewService(repository)
-	userRepository := user.NewRepository()
-	userService := user.NewService(userRepository)
+	nrepository := NewRepository()
+	service := NewService(nrepository)
+	userRepository := repository.NewUserRepository()
 
 	return &Handler{
-		service:     service,
-		userService: userService,
+		service:        service,
+		userRepository: userRepository,
 	}
 }
 
@@ -81,7 +80,7 @@ func (h *Handler) RegisterSetting(c *gin.Context) {
 // SendNotification は通知を送信するハンドラー
 func (h *Handler) SendNotification(c *gin.Context) {
 	// ユーザーを全取得
-	users, err := h.userService.GetAllUsers()
+	users, err := h.userRepository.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get users"})
 		return
