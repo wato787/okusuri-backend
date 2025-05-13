@@ -107,7 +107,7 @@ func (h *Handler) SendNotification(c *gin.Context) {
 			continue
 		}
 		if setting.IsEnabled {
-			err := h.service.SendNotification(user, setting, "お薬の時間です")
+			err := h.service.SendNotification(user, setting, "お薬の時間です🐣")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send notification"})
 				return
