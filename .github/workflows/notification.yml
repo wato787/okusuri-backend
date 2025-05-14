@@ -1,5 +1,5 @@
-# リトライ機能付きバージョン
-name: Daily Medication Notification with Retry
+# 通知送信 - リトライなしバージョン
+name: Daily Medication Notification
 
 on:
   schedule:
@@ -11,24 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send notification with retry
+      - name: Send notification
         run: |
-          max_attempts=3
-          attempt=1
+          response=$(curl -s -w "\n%{http_code}" -X POST https://okusuri-backend.onrender.com/api/notification)
+          http_code=$(echo "$response" | tail -n1)
 
-          while [ $attempt -le $max_attempts ]; do
-            response=$(curl -s -w "\n%{http_code}" -X POST https://okusuri-backend.onrender.com/api/notification)
-            http_code=$(echo "$response" | tail -n1)
-            
-            if [ "$http_code" -eq 200 ]; then
-              echo "Success on attempt $attempt"
-              exit 0
-            else
-              echo "Attempt $attempt failed with status $http_code"
-              sleep 5  # 5秒待機
-              attempt=$((attempt + 1))
-            fi
-          done
-
-          echo "All $max_attempts attempts failed"
-          exit 1
+          if [ "$http_code" -eq 200 ]; then
+            echo "Notification sent successfully"
+            exit 0
+          else
+            echo "Notification failed with status $http_code"
+            exit 1
+          fi
