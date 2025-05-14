@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	// DB接続
 	config.SetupDB()
 

@@ -11,7 +11,7 @@ func NewUserRepository() *UserRepository {
 	return &UserRepository{}
 }
 
-// tokenからユーザー情報を取得する
+// GetUserByToken はトークンからユーザー情報を取得する
 func (r *UserRepository) GetUserByToken(token string) (*model.User, error) {
 	db := config.DB
 	var user model.User

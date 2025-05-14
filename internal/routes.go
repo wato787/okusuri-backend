@@ -1,4 +1,3 @@
-// internal/routes.go
 package internal
 
 import (
