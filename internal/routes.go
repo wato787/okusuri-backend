@@ -4,6 +4,7 @@ import (
 	"okusuri-backend/internal/handler"
 	"okusuri-backend/internal/middleware"
 	"okusuri-backend/internal/repository"
+	"okusuri-backend/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,9 +15,12 @@ func SetupRoutes() *gin.Engine {
 	medicationRepo := repository.NewMedicationRepository()
 	notificationRepo := repository.NewNotificationRepository()
 
+	// サービスの初期化
+	notificationService := service.NewNotificationService()
+
 	// ハンドラーの初期化
 	medicationHandler := handler.NewMedicationHandler(medicationRepo)
-	notificationHandler := handler.NewNotificationHandler(notificationRepo, userRepo)
+	notificationHandler := handler.NewNotificationHandler(notificationRepo, userRepo, notificationService)
 
 	// Ginのルーターを作成
 	router := gin.Default()

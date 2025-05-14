@@ -5,6 +5,7 @@ import (
 	"okusuri-backend/internal/dto"
 	"okusuri-backend/internal/model"
 	"okusuri-backend/internal/repository"
+	"okusuri-backend/internal/service"
 	"okusuri-backend/pkg/helper"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +14,18 @@ import (
 type NotificationHandler struct {
 	notificationRepo *repository.NotificationRepository
 	userRepo         *repository.UserRepository
+	notificationSvc  *service.NotificationService
 }
 
-func NewNotificationHandler(notificationRepo *repository.NotificationRepository, userRepo *repository.UserRepository) *NotificationHandler {
+func NewNotificationHandler(
+	notificationRepo *repository.NotificationRepository,
+	userRepo *repository.UserRepository,
+	notificationSvc *service.NotificationService,
+) *NotificationHandler {
 	return &NotificationHandler{
 		notificationRepo: notificationRepo,
 		userRepo:         userRepo,
+		notificationSvc:  notificationSvc,
 	}
 }
 
@@ -103,7 +110,7 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 			continue
 		}
 		if setting.IsEnabled {
-			err := h.notificationRepo.SendNotification(user, setting, "お薬の時間です🐣")
+			err := h.notificationSvc.SendNotification(user, setting, "お薬の時間です🐣")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send notification"})
 				return
