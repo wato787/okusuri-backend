@@ -1,21 +1,23 @@
-package routes
+// internal/routes.go
+package internal
 
 import (
-	"okusuri-backend/internal/api/medication"
-	"okusuri-backend/internal/api/notification"
-	"okusuri-backend/internal/common/user"
+	"okusuri-backend/internal/handler"
 	"okusuri-backend/internal/middleware"
+	"okusuri-backend/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes() *gin.Engine {
+	// リポジトリの初期化
+	userRepo := repository.NewUserRepository()
+	medicationRepo := repository.NewMedicationRepository()
+	notificationRepo := repository.NewNotificationRepository()
 
-	notificationHandler := notification.NewHandler()
-	medicationLogHandler := medication.NewHandler()
-
-	// userRepositoryを初期化
-	userRepository := user.NewRepository()
+	// ハンドラーの初期化
+	medicationHandler := handler.NewMedicationHandler(medicationRepo)
+	notificationHandler := handler.NewNotificationHandler(notificationRepo, userRepo)
 
 	// Ginのルーターを作成
 	router := gin.Default()
@@ -35,17 +37,17 @@ func SetupRoutes() *gin.Engine {
 		api.POST(("/notification"), notificationHandler.SendNotification)
 
 		notificationSetting := api.Group("/notification/setting")
-		notificationSetting.Use(middleware.Auth(userRepository))
+		notificationSetting.Use(middleware.Auth(userRepo))
 		{
 			notificationSetting.GET("", notificationHandler.GetSetting)
 			notificationSetting.POST("", notificationHandler.RegisterSetting)
 		}
 
 		medicationLog := api.Group("/medication-log")
-		medicationLog.Use(middleware.Auth(userRepository))
+		medicationLog.Use(middleware.Auth(userRepo))
 		{
-			medicationLog.POST("", medicationLogHandler.RegisterLog)
-			medicationLog.GET("", medicationLogHandler.GetLogs)
+			medicationLog.POST("", medicationHandler.RegisterLog)
+			medicationLog.GET("", medicationHandler.GetLogs)
 		}
 	}
 
