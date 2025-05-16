@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"okusuri-backend/internal/model"
 	"okusuri-backend/pkg/config"
 )
@@ -50,4 +51,26 @@ func (r *MedicationRepository) GetLogByID(userID string, logID uint) (*model.Med
 	}
 
 	return &log, nil
+}
+
+// UpdateLog は指定されたIDの服薬ログを更新する
+func (r *MedicationRepository) UpdateLog(userID string, logID uint, hasBleeding bool) error {
+	// DB接続
+	db := config.DB
+
+	// ユーザーIDとログIDに基づいてログを更新
+	result := db.Model(&model.MedicationLog{}).
+		Where("id = ? AND user_id = ?", logID, userID).
+		Update("has_bleeding", hasBleeding)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// 更新された行数が0の場合は、ログが見つからないエラーを返す
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("log not found or user not authorized")
+	}
+
+	return nil
 }
