@@ -96,3 +96,44 @@ func (h *MedicationHandler) GetLogByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, log)
 }
+
+// UpdateLog は指定されたIDの服薬ログを更新するハンドラー
+func (h *MedicationHandler) UpdateLog(c *gin.Context) {
+	// ユーザーIDを取得
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// URLからIDパラメータを取得
+	logIDStr := c.Param("id")
+	logID, err := strconv.ParseUint(logIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid log ID"})
+		return
+	}
+
+	// リクエストボディを構造体にバインド
+	var req dto.MedicationLogRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	// リポジトリに更新処理を依頼
+	err = h.medicationRepo.UpdateLog(userID, uint(logID), req.HasBleeding)
+	if err != nil {
+		if err.Error() == "log not found or user not authorized" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update medication log"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.BaseResponse{
+		Success: true,
+		Message: "medication log updated successfully",
+	})
+}
