@@ -52,6 +52,7 @@ func SetupRoutes() *gin.Engine {
 			medicationLog.POST("", medicationHandler.RegisterLog)
 			medicationLog.GET("", medicationHandler.GetLogs)
 			medicationLog.GET("/:id", medicationHandler.GetLogByID)
+			medicationLog.PUT("/:id", medicationHandler.UpdateLog)
 		}
 	}
 
