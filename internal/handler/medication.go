@@ -6,6 +6,7 @@ import (
 	"okusuri-backend/internal/model"
 	"okusuri-backend/internal/repository"
 	"okusuri-backend/pkg/helper"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,4 +68,31 @@ func (h *MedicationHandler) GetLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, logs)
+}
+
+// GetLogByID は特定のIDの服薬ログを取得するハンドラー
+func (h *MedicationHandler) GetLogByID(c *gin.Context) {
+	// ユーザーIDを取得
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// URLからIDパラメータを取得
+	logIDStr := c.Param("id")
+	logID, err := strconv.ParseUint(logIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid log ID"})
+		return
+	}
+
+	// 服薬ログを取得
+	log, err := h.medicationRepo.GetLogByID(userID, uint(logID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "medication log not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, log)
 }
