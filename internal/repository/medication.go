@@ -37,3 +37,17 @@ func (r *MedicationRepository) GetLogsByUserID(userID string) ([]model.Medicatio
 
 	return logs, nil
 }
+
+// GetLogByID はIDに基づいて単一の服薬ログを取得する
+func (r *MedicationRepository) GetLogByID(userID string, logID uint) (*model.MedicationLog, error) {
+	// DB接続
+	db := config.DB
+
+	// ユーザーIDとログIDに基づいて服薬履歴を取得
+	var log model.MedicationLog
+	if err := db.Where("id = ? AND user_id = ?", logID, userID).First(&log).Error; err != nil {
+		return nil, err
+	}
+
+	return &log, nil
+}
