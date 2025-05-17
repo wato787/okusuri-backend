@@ -1,0 +1,48 @@
+# .air.toml
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 監視対象のディレクトリ
+include_dir = ["cmd", "internal", "pkg", "migrations"]
+# 監視対象の拡張子
+include_ext = ["go", "tpl", "tmpl", "html"]
+# メインパッケージへのパス
+cmd = "go build -o ./tmp/main ./cmd/server"
+# バイナリの実行パス
+bin = "./tmp/main"
+# ビルド時に実行するコマンド
+full_bin = "./tmp/main"
+# 変更検知後のディレイ（ミリ秒）
+delay = 1000
+# ファイル変更後にプロセスを終了するために送信するシグナル
+kill_delay = "0s"
+# ログのフォーマット設定
+log = "build-errors.log"
+# 監視から除外するディレクトリ
+exclude_dir = ["assets", "tmp", "vendor"]
+# 監視から除外するファイル
+exclude_file = []
+# 監視を止めるファイルパターン
+stop_on_error = true
+# 環境変数
+send_interrupt = false
+# 開発時は常にビルドを実行する
+delay_on_restart = 0
+# プロセスを終了するのに使用するシグナル
+kill_signal = "SIGINT"
+
+[log]
+# ログの表示
+time = false
+
+[color]
+# カラー表示設定
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# Ctrl+Cを押したときの挙動
+clean_on_exit = true
