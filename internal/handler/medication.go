@@ -5,6 +5,7 @@ import (
 	"okusuri-backend/internal/dto"
 	"okusuri-backend/internal/model"
 	"okusuri-backend/internal/repository"
+	"okusuri-backend/internal/service"
 	"okusuri-backend/pkg/helper"
 	"strconv"
 
@@ -136,4 +137,24 @@ func (h *MedicationHandler) UpdateLog(c *gin.Context) {
 		Success: true,
 		Message: "medication log updated successfully",
 	})
+}
+
+// GetMedicationStatus は現在の服薬ステータスを取得するハンドラー
+func (h *MedicationHandler) GetMedicationStatus(c *gin.Context) {
+	// ユーザーIDを取得
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// サービスから服薬ステータスを取得
+	medicationService := service.NewMedicationService(h.medicationRepo)
+	status, err := medicationService.GetMedicationStatus(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get medication status"})
+		return
+	}
+
+	c.JSON(http.StatusOK, status)
 }
