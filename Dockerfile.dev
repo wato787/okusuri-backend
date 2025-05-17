@@ -1,0 +1,20 @@
+# 開発用Dockerfile
+FROM golang:1.24
+
+WORKDIR /app
+
+# airのインストール
+RUN go install github.com/cosmtrek/air@latest
+
+# 必要なファイルをコピー
+COPY go.mod go.sum ./
+RUN go mod download
+
+# 設定ファイルをコピー
+COPY .air.toml ./
+
+# ソースコードをコピー
+COPY . .
+
+# ホットリロードで実行
+CMD ["air", "-c", ".air.toml"]
