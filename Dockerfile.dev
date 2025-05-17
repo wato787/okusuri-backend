@@ -4,7 +4,7 @@ FROM golang:1.24
 WORKDIR /app
 
 # airのインストール
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 # 必要なファイルをコピー
 COPY go.mod go.sum ./
