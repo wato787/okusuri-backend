@@ -2,6 +2,9 @@
 
 .PHONY: dev build run test clean install-deps install-air
 
+# Get Go bin directory path
+GO_BIN := $(shell go env GOPATH)/bin
+
 # デフォルトターゲット
 all: dev
 
@@ -15,7 +18,7 @@ install-air:
 
 # 開発モードで実行（ホットリロード）
 dev: install-air
-	air
+	$(GO_BIN)/air
 
 # ビルド
 build:
