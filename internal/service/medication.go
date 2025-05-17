@@ -65,41 +65,87 @@ func (s *MedicationService) GetMedicationStatus(userID string) (*dto.MedicationS
 func (s *MedicationService) calculateRestPeriodStatus(logs []model.MedicationLog, now time.Time) (bool, int, int) {
 	const restPeriodDays = 4 // 休薬期間は4日間
 	
-	// 最初に連続出血日数を計算
-	consecutiveBleedingDays := 0
+	// 日付ごとに整理したログを取得（同じ日の重複を除去）
+	dateLogMap := make(map[string]model.MedicationLog)
 	for _, log := range logs {
+		dateStr := log.CreatedAt.Format("2006-01-02")
+		// 同じ日付の場合は最新のログを使用
+		// logsは新しい順にソートされているため、最初に見つけたログが最新
+		if _, exists := dateLogMap[dateStr]; !exists {
+			dateLogMap[dateStr] = log
+		}
+	}
+	
+	// 日付を過去順（降順）にソート
+	var dates []time.Time
+	for _, log := range dateLogMap {
+		dates = append(dates, log.CreatedAt)
+	}
+	sort.Slice(dates, func(i, j int) bool {
+		return dates[i].After(dates[j])
+	})
+	
+	// 連続出血日数を計算
+	consecutiveBleedingDays := 0
+	var consecutiveBleedingDates []time.Time
+	lastDate := time.Time{}
+	
+	for _, date := range dates {
+		// 日付を正規化（時間部分を削除）
+		currDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+		
+		// 日付の文字列を取得
+		dateStr := currDate.Format("2006-01-02")
+		log := dateLogMap[dateStr]
+		
 		if log.HasBleeding {
-			consecutiveBleedingDays++
+			// 初めての出血日または連続している場合
+			if consecutiveBleedingDays == 0 || lastDate.IsZero() {
+				consecutiveBleedingDays = 1
+				consecutiveBleedingDates = append(consecutiveBleedingDates, currDate)
+			} else {
+				// 日付の差を計算
+				dayDiff := int(lastDate.Sub(currDate).Hours() / 24)
+				
+				// 前日からの連続か確認
+				if dayDiff == 1 {
+					consecutiveBleedingDays++
+					consecutiveBleedingDates = append(consecutiveBleedingDates, currDate)
+				} else {
+					// 日付が連続していない場合はリセット
+					consecutiveBleedingDays = 1
+					consecutiveBleedingDates = []time.Time{currDate}
+				}
+			}
 		} else {
+			// 出血がない場合はリセット
 			break
 		}
+		
+		lastDate = currDate
 	}
-
+	
 	// 連続3日間以上の出血がある場合、休薬期間判定
-	if consecutiveBleedingDays >= 3 {
-		// 最初の出血記録の日付から休薬期間を計算
-		// 記録は新しい順に並んでいるため、連続3日目の記録はインデックス2
-		if len(logs) >= 3 {
-			// 休薬開始日は3日連続出血の最初の日
-			restStartDate := logs[consecutiveBleedingDays-1].CreatedAt
-			
-			// 休薬終了日は休薬開始日から4日後の終日
-			restEndDate := restStartDate.AddDate(0, 0, restPeriodDays)
-			restEndDate = time.Date(restEndDate.Year(), restEndDate.Month(), restEndDate.Day(), 23, 59, 59, 0, restEndDate.Location())
-			
-			// 現在が休薬期間内かどうか
-			if now.Before(restEndDate) {
-				// 残り日数を計算（日単位で切り上げ）
-				duration := restEndDate.Sub(now)
-				daysLeft := int(duration.Hours() / 24)
-				if duration.Hours() > float64(daysLeft*24) {
-					daysLeft++
-				}
-				return true, daysLeft, consecutiveBleedingDays
+	if consecutiveBleedingDays >= 3 && len(consecutiveBleedingDates) >= 3 {
+		// 休薬開始日は連続出血の最初の日
+		restStartDate := consecutiveBleedingDates[len(consecutiveBleedingDates)-1]
+		
+		// 休薬終了日は休薬開始日から4日後の終日
+		restEndDate := restStartDate.AddDate(0, 0, restPeriodDays)
+		restEndDate = time.Date(restEndDate.Year(), restEndDate.Month(), restEndDate.Day(), 23, 59, 59, 0, restEndDate.Location())
+		
+		// 現在が休薬期間内かどうか
+		if now.Before(restEndDate) {
+			// 残り日数を計算（日単位で切り上げ）
+			duration := restEndDate.Sub(now)
+			daysLeft := int(duration.Hours() / 24)
+			if duration.Hours() > float64(daysLeft*24) {
+				daysLeft++
 			}
+			return true, daysLeft, consecutiveBleedingDays
 		}
 	}
-
+	
 	return false, 0, consecutiveBleedingDays
 }
 
@@ -138,25 +184,61 @@ func (s *MedicationService) calculateCurrentStreak(logs []model.MedicationLog, n
 		}
 	}
 	
-	// 休薬期間後の最初のログから数える
+	// 日付ごとに整理したログを取得（同じ日の重複を除去）
+	dateMap := make(map[string]time.Time)
+	for _, log := range logs {
+		dateStr := log.CreatedAt.Format("2006-01-02")
+		// 既に同じ日付のログがある場合は最新のものを使用
+		if _, exists := dateMap[dateStr]; !exists {
+			dateMap[dateStr] = log.CreatedAt
+		}
+	}
+	
+	// 日付を過去順（降順）にソート
+	var dates []time.Time
+	for _, date := range dateMap {
+		dates = append(dates, date)
+	}
+	sort.Slice(dates, func(i, j int) bool {
+		return dates[i].After(dates[j])
+	})
+	
+	// 現在の日付の前日
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	yesterday := today.AddDate(0, 0, -1)
+	
+	// 休薬期間後からの連続日数をカウント
 	streak := 0
-	if !lastRestPeriodEndDate.IsZero() {
-		// 休薬期間後のログをカウント
-		for _, log := range logs {
-			if log.CreatedAt.After(lastRestPeriodEndDate) {
-				streak++
-			} else {
-				break
-			}
+	lastDate := today // 最初は今日から開始
+	
+	for _, date := range dates {
+		// 日付を正規化（時間部分を削除）
+		currDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+		
+		// 休薬期間後のログのみカウント
+		if !lastRestPeriodEndDate.IsZero() && currDate.Before(lastRestPeriodEndDate) {
+			break
 		}
-	} else {
-		// 休薬期間がない場合は、すべてのログをカウント（日付ベースでユニーク）
-		dateSet := make(map[string]bool)
-		for _, log := range logs {
-			dateStr := log.CreatedAt.Format("2006-01-02")
-			dateSet[dateStr] = true
+		
+		// 現在の日付または前日の場合はカウント
+		if currDate.Equal(today) || currDate.Equal(yesterday) {
+			streak++
+			lastDate = currDate
+			continue
 		}
-		streak = len(dateSet)
+		
+		// 日付の差を計算
+		dayDiff := int(lastDate.Sub(currDate).Hours() / 24)
+		
+		// 日付が連続しているか確認
+		if dayDiff == 1 {
+			// 前日のログであればカウント
+			streak++
+			lastDate = currDate
+		} else {
+			// 日付が連続していない場合は終了
+			break
+		}
 	}
 	
 	return streak
