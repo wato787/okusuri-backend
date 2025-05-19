@@ -20,7 +20,11 @@ func SetupRoutes() *gin.Engine {
 
 	// ハンドラーの初期化
 	medicationHandler := handler.NewMedicationHandler(medicationRepo)
-	notificationHandler := handler.NewNotificationHandler(notificationRepo, userRepo, notificationService)
+	notificationHandler := handler.NewNotificationHandler(
+		notificationRepo, 
+		userRepo, 
+		notificationService,
+	)
 
 	// Ginのルーターを作成
 	router := gin.Default()
