@@ -1,4 +1,3 @@
-// internal/service/notification.go
 package service
 
 import (
@@ -37,7 +36,7 @@ func (s *NotificationService) isRecentlySent(token string) bool {
 
 	// 5分以内の送信なら重複とみなす
 	timeSinceLast := time.Since(lastSent)
-	fmt.Printf(">> 前回の送信からの経過時間: %v (トークン: %s...)\n", 
+	fmt.Printf(">> 前回の送信からの経過時間: %v (トークン: %s...)\n",
 		timeSinceLast.Round(time.Second), token[:10])
 	return timeSinceLast < 5*time.Minute
 }
@@ -67,13 +66,13 @@ func (s *NotificationService) SendNotification(user model.User, setting model.No
 		if len(tokenPreview) > 10 {
 			tokenPreview = tokenPreview[:10] + "..."
 		}
-		
+
 		fmt.Printf("\n>> 通知送信サービス: ユーザーID: %s の処理を開始します\n", user.ID)
 		fmt.Printf(">> FCMトークン: %s\n", tokenPreview)
-		
+
 		// 最近送信済みなら重複送信をスキップ
 		if s.isRecentlySent(setting.FcmToken) {
-			fmt.Printf(">> 通知送信サービス: トークン %s は最近送信済みのためスキップします\n", 
+			fmt.Printf(">> 通知送信サービス: トークン %s は最近送信済みのためスキップします\n",
 				tokenPreview)
 			return nil // エラーにせず成功扱いでスキップ
 		}
@@ -90,7 +89,7 @@ func (s *NotificationService) SendNotification(user model.User, setting model.No
 		// 通知メッセージの作成
 		messageID := fmt.Sprintf("medication-%d", time.Now().UnixNano())
 		fmt.Printf(">> 通知送信サービス: メッセージID: %s を作成\n", messageID)
-		
+
 		msg := &messaging.Message{
 			Notification: &messaging.Notification{
 				Title: "通知",
@@ -108,21 +107,21 @@ func (s *NotificationService) SendNotification(user model.User, setting model.No
 		// 送信前にログ
 		fmt.Printf(">> 通知送信サービス: FCMに送信リクエスト実行...\n")
 		startTime := time.Now()
-		
+
 		// 通知の送信
 		sendResult, err := client.Send(ctx, msg)
 		elapsedTime := time.Since(startTime)
-		
+
 		if err != nil {
-			fmt.Printf(">> 通知送信サービス: 通知送信エラー: %v (所要時間: %v)\n", 
+			fmt.Printf(">> 通知送信サービス: 通知送信エラー: %v (所要時間: %v)\n",
 				err, elapsedTime.Round(time.Millisecond))
 			return fmt.Errorf("通知送信エラー: %v", err)
 		}
 
 		// 送信済みとしてマーク
 		s.markAsSent(setting.FcmToken)
-		
-		fmt.Printf(">> 通知送信サービス: 通知送信成功 - FCM MessageID: %s (所要時間: %v)\n", 
+
+		fmt.Printf(">> 通知送信サービス: 通知送信成功 - FCM MessageID: %s (所要時間: %v)\n",
 			sendResult, elapsedTime.Round(time.Millisecond))
 		fmt.Printf(">> 通知送信サービス: ユーザーID %s の処理完了\n", user.ID)
 	} else {

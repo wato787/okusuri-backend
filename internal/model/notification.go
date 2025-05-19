@@ -15,5 +15,6 @@ type NotificationSetting struct {
 	UserID       string         `json:"userId" gorm:"not null;index:idx_user_platform,unique:true,part:1"`
 	Platform     string         `json:"platform" gorm:"not null;index:idx_user_platform,unique:true,part:2"`
 	IsEnabled    bool           `json:"isEnabled" gorm:"default:true"`
+	FcmToken     string         `json:"fcmToken" gorm:"not null"`      // 後方互換性のため残す
 	Subscription string         `json:"subscription" gorm:"type:text"` // Web Push用のサブスクリプション
 }
