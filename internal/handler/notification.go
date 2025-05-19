@@ -154,23 +154,30 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		}
 
 		// 送信済みのサブスクリプションをスキップ
-		if _, alreadySent := sentSubs[setting.Subscription]; alreadySent {
+		if _, alreadySent := sentSubs[setting.Subscription]; alreadySent && setting.Subscription != "" {
 			fmt.Printf("ユーザーID: %s のサブスクリプションはすでに送信済みのためスキップします (サブスクリプション: %s)\n",
 				user.ID, getPreview(setting.Subscription))
 			continue
 		}
 
+		// 通知送信
 		fmt.Printf("ユーザーID: %s に通知送信中 (サブスクリプション: %s)\n",
 			user.ID, getPreview(setting.Subscription))
-		err := h.notificationSvc.SendNotification(user, setting, "お薬の時間です🐣")
+		
+		// 服薬メッセージは簡単なものにしておく
+		message := "お薬の時間です。忘れずに服用してください。"
+		
+		err := h.notificationSvc.SendNotification(user, setting, message)
 		if err != nil {
 			fmt.Printf("エラー: 通知送信失敗: %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send notification"})
-			return
+			// エラーがあっても処理を続行
+			continue
 		}
 
-		// 送信済みとしてマーク
-		sentSubs[setting.Subscription] = true
+		// 送信済みとしてマーク (空のサブスクリプションはマークしない)
+		if setting.Subscription != "" {
+			sentSubs[setting.Subscription] = true
+		}
 		fmt.Printf("ユーザーID: %s への通知送信成功\n", user.ID)
 	}
 	fmt.Printf("----- 通知送信処理完了: 合計%d件送信 -----\n", len(sentSubs))
@@ -190,6 +197,10 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 
 // トークンやサブスクリプションの先頭数文字を取得するヘルパー関数
 func getPreview(str string) string {
+	if str == "" {
+		return "空"
+	}
+	
 	if len(str) <= 10 {
 		return str
 	}
