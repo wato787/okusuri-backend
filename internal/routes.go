@@ -21,8 +21,8 @@ func SetupRoutes() *gin.Engine {
 	// ハンドラーの初期化
 	medicationHandler := handler.NewMedicationHandler(medicationRepo)
 	notificationHandler := handler.NewNotificationHandler(
-		notificationRepo, 
-		userRepo, 
+		notificationRepo,
+		userRepo,
 		notificationService,
 	)
 

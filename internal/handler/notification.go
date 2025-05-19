@@ -163,10 +163,10 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		// 通知送信
 		fmt.Printf("ユーザーID: %s に通知送信中 (サブスクリプション: %s)\n",
 			user.ID, getPreview(setting.Subscription))
-		
+
 		// 服薬メッセージは簡単なものにしておく
 		message := "お薬の時間です。忘れずに服用してください。"
-		
+
 		err := h.notificationSvc.SendNotification(user, setting, message)
 		if err != nil {
 			fmt.Printf("エラー: 通知送信失敗: %v\n", err)
@@ -200,7 +200,7 @@ func getPreview(str string) string {
 	if str == "" {
 		return "空"
 	}
-	
+
 	if len(str) <= 10 {
 		return str
 	}
