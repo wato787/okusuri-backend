@@ -1,132 +1,167 @@
 package service
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"okusuri-backend/internal/model"
-	"okusuri-backend/pkg/config"
+	"os"
 	"sync"
 	"time"
 
-	"firebase.google.com/go/v4/messaging"
+	webpush "github.com/SherClockHolmes/webpush-go"
 )
 
+// NotificationService は通知を送信するサービス
 type NotificationService struct {
-	// 直近に送信したトークンとタイムスタンプを保持するマップ
-	// キー: FCMトークン, 値: 最後の送信時刻
+	// 直近に送信したサブスクリプションとタイムスタンプを保持するマップ
 	recentSends     map[string]time.Time
 	recentSendMutex sync.Mutex
 }
 
+// サブスクリプションデータの構造体
+type PushSubscription struct {
+	Endpoint string `json:"endpoint"`
+	Keys     struct {
+		P256dh string `json:"p256dh"`
+		Auth   string `json:"auth"`
+	} `json:"keys"`
+}
+
+// 通知データの構造体
+type NotificationData struct {
+	Title string            `json:"title"`
+	Body  string            `json:"body"`
+	Data  map[string]string `json:"data,omitempty"`
+}
+
+// 新しいNotificationServiceのインスタンスを作成
 func NewNotificationService() *NotificationService {
 	return &NotificationService{
 		recentSends: make(map[string]time.Time),
 	}
 }
 
-// 最近送信した通知かどうかをチェック（5分以内に同じトークンに送信したか）
-func (s *NotificationService) isRecentlySent(token string) bool {
+// 最近送信した通知かどうかをチェック（5分以内に同じサブスクリプションに送信したか）
+func (s *NotificationService) isRecentlySent(subKey string) bool {
 	s.recentSendMutex.Lock()
 	defer s.recentSendMutex.Unlock()
 
-	lastSent, exists := s.recentSends[token]
+	lastSent, exists := s.recentSends[subKey]
 	if !exists {
 		return false
 	}
 
 	// 5分以内の送信なら重複とみなす
 	timeSinceLast := time.Since(lastSent)
-	fmt.Printf(">> 前回の送信からの経過時間: %v (トークン: %s...)\n",
-		timeSinceLast.Round(time.Second), token[:10])
+	fmt.Printf(">> 前回の送信からの経過時間: %v (サブスクリプション: %s...)\n",
+		timeSinceLast.Round(time.Second), subKey[:10])
 	return timeSinceLast < 5*time.Minute
 }
 
 // 送信記録を更新
-func (s *NotificationService) markAsSent(token string) {
+func (s *NotificationService) markAsSent(subKey string) {
 	s.recentSendMutex.Lock()
 	defer s.recentSendMutex.Unlock()
 
-	s.recentSends[token] = time.Now()
-	fmt.Printf(">> トークン %s... を送信済みとしてマークしました\n", token[:10])
+	s.recentSends[subKey] = time.Now()
+	fmt.Printf(">> サブスクリプション %s... を送信済みとしてマークしました\n", subKey[:10])
 
 	// 古い記録をクリーンアップ（1時間以上前のものを削除）
-	for t, lastSent := range s.recentSends {
+	for key, lastSent := range s.recentSends {
 		if time.Since(lastSent) > time.Hour {
-			delete(s.recentSends, t)
-			fmt.Printf(">> 古い送信記録を削除: %s...\n", t[:10])
+			delete(s.recentSends, key)
+			fmt.Printf(">> 古い送信記録を削除: %s...\n", key[:10])
 		}
 	}
 }
 
 // SendNotification は通知を送信する
 func (s *NotificationService) SendNotification(user model.User, setting model.NotificationSetting, message string) error {
-	// fcmTokenが空でない場合、通知を送信する
-	if setting.FcmToken != "" {
-		tokenPreview := setting.FcmToken
-		if len(tokenPreview) > 10 {
-			tokenPreview = tokenPreview[:10] + "..."
-		}
-
-		fmt.Printf("\n>> 通知送信サービス: ユーザーID: %s の処理を開始します\n", user.ID)
-		fmt.Printf(">> FCMトークン: %s\n", tokenPreview)
-
-		// 最近送信済みなら重複送信をスキップ
-		if s.isRecentlySent(setting.FcmToken) {
-			fmt.Printf(">> 通知送信サービス: トークン %s は最近送信済みのためスキップします\n",
-				tokenPreview)
-			return nil // エラーにせず成功扱いでスキップ
-		}
-
-		ctx := context.Background()
-
-		// 初期化済みのFCMクライアントを取得
-		client, err := config.GetMessagingClient(ctx)
-		if err != nil {
-			fmt.Printf(">> 通知送信サービス: FCMクライアント取得エラー: %v\n", err)
-			return fmt.Errorf("FCMクライアント取得エラー: %v", err)
-		}
-
-		// 通知メッセージの作成
-		messageID := fmt.Sprintf("medication-%d", time.Now().UnixNano())
-		fmt.Printf(">> 通知送信サービス: メッセージID: %s を作成\n", messageID)
-
-		msg := &messaging.Message{
-			Notification: &messaging.Notification{
-				Title: "通知",
-				Body:  message,
-			},
-			// 重複排除のためにメッセージIDを明示的に設定
-			Data: map[string]string{
-				"messageId": messageID,
-				"timestamp": fmt.Sprintf("%d", time.Now().Unix()),
-				"userId":    user.ID,
-			},
-			Token: setting.FcmToken,
-		}
-
-		// 送信前にログ
-		fmt.Printf(">> 通知送信サービス: FCMに送信リクエスト実行...\n")
-		startTime := time.Now()
-
-		// 通知の送信
-		sendResult, err := client.Send(ctx, msg)
-		elapsedTime := time.Since(startTime)
-
-		if err != nil {
-			fmt.Printf(">> 通知送信サービス: 通知送信エラー: %v (所要時間: %v)\n",
-				err, elapsedTime.Round(time.Millisecond))
-			return fmt.Errorf("通知送信エラー: %v", err)
-		}
-
-		// 送信済みとしてマーク
-		s.markAsSent(setting.FcmToken)
-
-		fmt.Printf(">> 通知送信サービス: 通知送信成功 - FCM MessageID: %s (所要時間: %v)\n",
-			sendResult, elapsedTime.Round(time.Millisecond))
-		fmt.Printf(">> 通知送信サービス: ユーザーID %s の処理完了\n", user.ID)
-	} else {
-		fmt.Printf(">> 通知送信サービス: ユーザーID: %s のFCMトークンが空です\n", user.ID)
+	// subscriptionが空の場合
+	if setting.Subscription == "" {
+		fmt.Printf(">> 通知サービス: ユーザーID: %s のサブスクリプションが空です\n", user.ID)
+		return fmt.Errorf("サブスクリプションが見つかりません")
 	}
+
+	subscriptionPreview := setting.Subscription
+	if len(subscriptionPreview) > 10 {
+		subscriptionPreview = subscriptionPreview[:10] + "..."
+	}
+
+	fmt.Printf("\n>> 通知サービス: ユーザーID: %s の処理を開始します\n", user.ID)
+	fmt.Printf(">> サブスクリプション: %s\n", subscriptionPreview)
+
+	// JSON文字列をパース
+	var subscription PushSubscription
+	err := json.Unmarshal([]byte(setting.Subscription), &subscription)
+	if err != nil {
+		fmt.Printf(">> 通知サービス: サブスクリプションのパースに失敗: %v\n", err)
+		return fmt.Errorf("サブスクリプションのパースに失敗: %v", err)
+	}
+
+	// 最近送信済みなら重複送信をスキップ
+	subKey := subscription.Endpoint
+	if s.isRecentlySent(subKey) {
+		fmt.Printf(">> 通知サービス: サブスクリプション %s は最近送信済みのためスキップします\n",
+			subscriptionPreview)
+		return nil // エラーにせず成功扱いでスキップ
+	}
+
+	// VAPID鍵の取得
+	vapidPublicKey := os.Getenv("VAPID_PUBLIC_KEY")
+	vapidPrivateKey := os.Getenv("VAPID_PRIVATE_KEY")
+
+	if vapidPublicKey == "" || vapidPrivateKey == "" {
+		fmt.Printf(">> 通知サービス: VAPID鍵が設定されていません\n")
+		return fmt.Errorf("VAPID鍵が設定されていません")
+	}
+
+	// 通知内容の作成
+	notificationData := NotificationData{
+		Title: "お薬通知",
+		Body:  message,
+		Data: map[string]string{
+			"messageId": fmt.Sprintf("medication-%d", time.Now().UnixNano()),
+			"timestamp": fmt.Sprintf("%d", time.Now().Unix()),
+			"userId":    user.ID,
+		},
+	}
+
+	// 通知内容をJSONに変換
+	payload, err := json.Marshal(notificationData)
+	if err != nil {
+		fmt.Printf(">> 通知サービス: 通知内容のJSON変換に失敗: %v\n", err)
+		return fmt.Errorf("通知内容のJSON変換に失敗: %v", err)
+	}
+
+	// Web Push通知の送信
+	_, err = webpush.SendNotification(
+		payload,
+		&webpush.Subscription{
+			Endpoint: subscription.Endpoint,
+			Keys: webpush.Keys{
+				P256dh: subscription.Keys.P256dh,
+				Auth:   subscription.Keys.Auth,
+			},
+		},
+		&webpush.Options{
+			VAPIDPublicKey:  vapidPublicKey,
+			VAPIDPrivateKey: vapidPrivateKey,
+			TTL:             30,
+			Subscriber:      "example@example.com", // 開発者のメールアドレス
+		},
+	)
+
+	if err != nil {
+		fmt.Printf(">> 通知サービス: 通知送信エラー: %v\n", err)
+		return fmt.Errorf("通知送信エラー: %v", err)
+	}
+
+	// 送信済みとしてマーク
+	s.markAsSent(subKey)
+
+	fmt.Printf(">> 通知サービス: 通知送信成功\n")
+	fmt.Printf(">> 通知サービス: ユーザーID %s の処理完了\n", user.ID)
 
 	return nil
 }
