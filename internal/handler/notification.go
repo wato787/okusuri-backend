@@ -68,10 +68,10 @@ func (h *NotificationHandler) RegisterSetting(c *gin.Context) {
 
 	// 通知設定をモデルに変換
 	setting := model.NotificationSetting{
-		UserID:    userID,
-		IsEnabled: req.IsEnabled,
-		FcmToken:  req.FcmToken,
-		Platform:  req.Platform,
+		UserID:       userID,
+		IsEnabled:    req.IsEnabled,
+		Platform:     req.Platform,
+		Subscription: req.Subscription,
 	}
 
 	// リポジトリに登録処理を依頼
@@ -100,7 +100,7 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		return
 	}
 	fmt.Printf("取得したユーザー数: %d\n", len(users))
-	
+
 	// ユーザーIDを表示
 	fmt.Println("ユーザーID一覧:")
 	for i, user := range users {
@@ -115,13 +115,13 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		return
 	}
 	fmt.Printf("取得した通知設定数: %d\n", len(settings))
-	
+
 	// 通知設定詳細を表示
 	fmt.Println("通知設定一覧:")
 	for i, setting := range settings {
-		tokenPreview := getTokenPreview(setting.FcmToken)
-		fmt.Printf("  %d. ユーザーID: %s, 有効: %t, トークン: %s, 更新日時: %s\n", 
-			i+1, setting.UserID, setting.IsEnabled, tokenPreview, setting.UpdatedAt)
+		subPreview := getPreview(setting.Subscription)
+		fmt.Printf("  %d. ユーザーID: %s, 有効: %t, サブスクリプション: %s, 更新日時: %s\n",
+			i+1, setting.UserID, setting.IsEnabled, subPreview, setting.UpdatedAt)
 	}
 
 	// 通知設定をユーザーに紐づける - 各ユーザーの最新設定のみを保持
@@ -130,14 +130,14 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		existingSetting, exists := settingsMap[setting.UserID]
 		if !exists || setting.UpdatedAt.After(existingSetting.UpdatedAt) {
 			settingsMap[setting.UserID] = setting
-			fmt.Printf("ユーザーID: %s の通知設定を登録/更新 (トークン: %s)\n", 
-				setting.UserID, getTokenPreview(setting.FcmToken))
+			fmt.Printf("ユーザーID: %s の通知設定を登録/更新 (サブスクリプション: %s)\n",
+				setting.UserID, getPreview(setting.Subscription))
 		}
 	}
 	fmt.Printf("通知対象ユーザー数: %d\n", len(settingsMap))
 
-	// 一時的に送信済みのFCMトークンを記録するセット
-	sentTokens := make(map[string]bool)
+	// 一時的に送信済みのサブスクリプションを記録するセット
+	sentSubs := make(map[string]bool)
 
 	// 通知送信処理
 	fmt.Println("----- 通知送信処理開始 -----")
@@ -152,16 +152,16 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 			fmt.Printf("ユーザーID: %s の通知は無効化されています\n", user.ID)
 			continue
 		}
-		
-		// 送信済みのトークンをスキップ
-		if _, alreadySent := sentTokens[setting.FcmToken]; alreadySent {
-			fmt.Printf("ユーザーID: %s のトークンはすでに送信済みのためスキップします (トークン: %s)\n", 
-				user.ID, getTokenPreview(setting.FcmToken))
+
+		// 送信済みのサブスクリプションをスキップ
+		if _, alreadySent := sentSubs[setting.Subscription]; alreadySent {
+			fmt.Printf("ユーザーID: %s のサブスクリプションはすでに送信済みのためスキップします (サブスクリプション: %s)\n",
+				user.ID, getPreview(setting.Subscription))
 			continue
 		}
 
-		fmt.Printf("ユーザーID: %s に通知送信中 (トークン: %s)\n", 
-			user.ID, getTokenPreview(setting.FcmToken))
+		fmt.Printf("ユーザーID: %s に通知送信中 (サブスクリプション: %s)\n",
+			user.ID, getPreview(setting.Subscription))
 		err := h.notificationSvc.SendNotification(user, setting, "お薬の時間です🐣")
 		if err != nil {
 			fmt.Printf("エラー: 通知送信失敗: %v\n", err)
@@ -170,28 +170,28 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		}
 
 		// 送信済みとしてマーク
-		sentTokens[setting.FcmToken] = true
+		sentSubs[setting.Subscription] = true
 		fmt.Printf("ユーザーID: %s への通知送信成功\n", user.ID)
 	}
-	fmt.Printf("----- 通知送信処理完了: 合計%d件送信 -----\n", len(sentTokens))
+	fmt.Printf("----- 通知送信処理完了: 合計%d件送信 -----\n", len(sentSubs))
 
 	// 処理時間を計算
 	processingTime := time.Since(requestTime)
 	fmt.Printf("処理時間: %v\n", processingTime)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "notification sent successfully",
-		"sent_count": len(sentTokens),
+		"message":         "notification sent successfully",
+		"sent_count":      len(sentSubs),
 		"process_time_ms": processingTime.Milliseconds(),
 	})
-	fmt.Printf("========== 通知送信処理終了 [%s] ==========\n\n", 
+	fmt.Printf("========== 通知送信処理終了 [%s] ==========\n\n",
 		time.Now().Format("2006-01-02 15:04:05"))
 }
 
-// FCMトークンの先頭数文字を取得するヘルパー関数
-func getTokenPreview(token string) string {
-	if len(token) <= 10 {
-		return token
+// トークンやサブスクリプションの先頭数文字を取得するヘルパー関数
+func getPreview(str string) string {
+	if len(str) <= 10 {
+		return str
 	}
-	return token[:10] + "..."
+	return str[:10] + "..."
 }
