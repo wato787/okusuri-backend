@@ -42,6 +42,11 @@ func (h *MedicationHandler) RegisterLog(c *gin.Context) {
 		HasBleeding: req.HasBleeding,
 	}
 
+	// 日付が指定されている場合は、その日付を使用
+	if req.Date != nil {
+		medicationLog.CreatedAt = *req.Date
+	}
+
 	// リポジトリを直接呼び出す
 	err = h.medicationRepo.RegisterLog(userID, medicationLog)
 	if err != nil {
@@ -122,7 +127,6 @@ func (h *MedicationHandler) UpdateLog(c *gin.Context) {
 		return
 	}
 
-	// リポジトリに更新処理を依頼
 	err = h.medicationRepo.UpdateLog(userID, uint(logID), req.HasBleeding)
 	if err != nil {
 		if err.Error() == "log not found or user not authorized" {
@@ -131,6 +135,7 @@ func (h *MedicationHandler) UpdateLog(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update medication log"})
 		return
+
 	}
 
 	c.JSON(http.StatusOK, dto.BaseResponse{
