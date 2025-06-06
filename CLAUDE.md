@@ -51,3 +51,7 @@ Uses JWT-based authentication middleware for protected routes. User ID is extrac
 - **MedicationLog**: Tracks medication intake with bleeding status
 - **NotificationSetting**: Manages user notification preferences per platform
 - **User**: User authentication and identification
+
+## Development Rules
+
+- **Language**: Always respond in Japanese when working in this repository
