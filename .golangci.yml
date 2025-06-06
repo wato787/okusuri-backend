@@ -1,0 +1,81 @@
+# Go linter configuration
+# Defines code quality and style rules for Go projects
+
+run:
+  timeout: 5m
+  tests: true
+
+linters-settings:
+  gofmt:
+    simplify: true
+  
+  goimports:
+    local-prefixes: okusuri-backend
+  
+  govet:
+    check-shadowing: true
+  
+  cyclop:
+    max-complexity: 15
+  
+  gocyclo:
+    min-complexity: 15
+  
+  dupl:
+    threshold: 100
+  
+  funlen:
+    lines: 60
+    statements: 40
+  
+  lll:
+    line-length: 120
+  
+  varnamelen:
+    min-name-length: 3
+    ignore-names:
+      - err
+      - db
+      - id
+      - i
+      - j
+      - k
+      - v
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - errcheck
+    - gosimple
+    - ineffassign
+    - staticcheck
+    - unused
+    - typecheck
+    - deadcode
+    - varcheck
+    - structcheck
+    - misspell
+    - unconvert
+    - dupl
+    - gocyclo
+    - cyclop
+    - funlen
+    - lll
+    - varnamelen
+  
+  disable:
+    - gosec  # Security checks might be too strict for development
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - funlen
+        - varnamelen
