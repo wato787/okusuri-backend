@@ -121,10 +121,10 @@ func (s *NotificationService) SendNotificationWithDays(user model.User, setting 
 		Title: "お薬通知",
 		Body:  message,
 		Data: map[string]string{
-			"messageId":        fmt.Sprintf("medication-%d", time.Now().UnixNano()),
-			"timestamp":        fmt.Sprintf("%d", time.Now().Unix()),
-			"userId":           user.ID,
-			"consecutiveDays":  fmt.Sprintf("%d", consecutiveDays),
+			"messageId":       fmt.Sprintf("medication-%d", time.Now().UnixNano()),
+			"timestamp":       fmt.Sprintf("%d", time.Now().Unix()),
+			"userId":          user.ID,
+			"consecutiveDays": fmt.Sprintf("%d", consecutiveDays),
 		},
 	}
 
