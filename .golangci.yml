@@ -1,0 +1,50 @@
+# Go linter configuration
+# Defines code quality and style rules for Go projects
+
+run:
+  timeout: 5m
+  tests: true
+
+linters-settings:
+  gofmt:
+    simplify: true
+  
+  goimports:
+    local-prefixes: okusuri-backend
+  
+  govet:
+    enable:
+      - shadow
+  
+  gocyclo:
+    min-complexity: 15
+  
+  lll:
+    line-length: 120
+
+linters:
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - gosimple
+    - ineffassign
+    - staticcheck
+    - unused
+    - typecheck
+    - misspell
+    - unconvert
+    - gocyclo
+    - lll
+  
+  disable:
+    - gosec  # Security checks might be too strict for development
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec

@@ -54,4 +54,31 @@ Uses JWT-based authentication middleware for protected routes. User ID is extrac
 
 ## Development Rules
 
+### Language & Communication
 - **Language**: Always respond in Japanese when working in this repository
+- **Code Comments**: Write code comments in Japanese when appropriate
+- **PR Descriptions**: Write PR descriptions in Japanese
+
+### Code Quality & Formatting
+- **Code Formatting**: Always run `gofmt -l .` before committing and ensure no files are listed (format with `gofmt -w .` if needed)
+- **Dependencies**: Run `go mod tidy` after adding or removing dependencies
+- **Testing**: Use testify framework for API tests (`github.com/stretchr/testify`)
+- **Test Coverage**: Write tests for new features and bug fixes
+
+### Commit & PR Guidelines
+- **Commit Messages**: Write descriptive commit messages in Japanese that explain the purpose of changes
+- **Commit Granularity**: Make appropriately sized commits - not too large, not too small
+- **Claude Code Signature**: Include the following signature in commit messages:
+  ```
+  🤖 Generated with [Claude Code](https://claude.ai/code)
+  
+  Co-Authored-By: Claude <noreply@anthropic.com>
+  ```
+- **Issue Linking**: Link PRs to issues using `Closes #XX` when applicable
+- **PR Structure**: One feature per PR - keep changes focused and reviewable
+
+### Development Workflow
+- **Branch Strategy**: Create feature branches from main (`feature/description`)
+- **Testing**: Run tests before committing (`make test`)
+- **Build Verification**: Ensure code builds successfully (`make build`)
+- **Hot Reload**: Use `make dev` for development with hot reload
