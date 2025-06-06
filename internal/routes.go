@@ -17,6 +17,7 @@ func SetupRoutes() *gin.Engine {
 
 	// サービスの初期化
 	notificationService := service.NewNotificationService()
+	medicationService := service.NewMedicationService(medicationRepo)
 
 	// ハンドラーの初期化
 	medicationHandler := handler.NewMedicationHandler(medicationRepo)
@@ -25,6 +26,7 @@ func SetupRoutes() *gin.Engine {
 		userRepo,
 		notificationService,
 		medicationRepo,
+		medicationService,
 	)
 
 	// Ginのルーターを作成
