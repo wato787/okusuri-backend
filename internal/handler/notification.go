@@ -17,17 +17,20 @@ type NotificationHandler struct {
 	notificationRepo *repository.NotificationRepository
 	userRepo         *repository.UserRepository
 	notificationSvc  *service.NotificationService
+	medicationRepo   *repository.MedicationRepository
 }
 
 func NewNotificationHandler(
 	notificationRepo *repository.NotificationRepository,
 	userRepo *repository.UserRepository,
 	notificationSvc *service.NotificationService,
+	medicationRepo *repository.MedicationRepository,
 ) *NotificationHandler {
 	return &NotificationHandler{
 		notificationRepo: notificationRepo,
 		userRepo:         userRepo,
 		notificationSvc:  notificationSvc,
+		medicationRepo:   medicationRepo,
 	}
 }
 
@@ -164,10 +167,22 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		fmt.Printf("ユーザーID: %s に通知送信中 (サブスクリプション: %s)\n",
 			user.ID, getPreview(setting.Subscription))
 
-		// 服薬メッセージは簡単なものにしておく
-		message := "お薬の時間です。忘れずに服用してください。"
+		// 連続服薬日数を取得
+		consecutiveDays, err := h.medicationRepo.GetConsecutiveDays(user.ID)
+		if err != nil {
+			fmt.Printf("エラー: 連続服薬日数の取得に失敗: %v\n", err)
+			consecutiveDays = 0 // エラーの場合は0日として処理
+		}
 
-		err := h.notificationSvc.SendNotification(user, setting, message)
+		// 連続服薬日数を含むメッセージを作成
+		var message string
+		if consecutiveDays > 0 {
+			message = fmt.Sprintf("お薬の時間です。忘れずに服用してください。（連続%d日目）", consecutiveDays)
+		} else {
+			message = "お薬の時間です。忘れずに服用してください。"
+		}
+
+		err = h.notificationSvc.SendNotificationWithDays(user, setting, message, consecutiveDays)
 		if err != nil {
 			fmt.Printf("エラー: 通知送信失敗: %v\n", err)
 			// エラーがあっても処理を続行

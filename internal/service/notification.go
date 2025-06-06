@@ -75,8 +75,8 @@ func (s *NotificationService) markAsSent(subKey string) {
 	}
 }
 
-// SendNotification は通知を送信する
-func (s *NotificationService) SendNotification(user model.User, setting model.NotificationSetting, message string) error {
+// SendNotificationWithDays は連続服薬日数を含めて通知を送信する
+func (s *NotificationService) SendNotificationWithDays(user model.User, setting model.NotificationSetting, message string, consecutiveDays int) error {
 	// subscriptionが空の場合
 	if setting.Subscription == "" {
 		fmt.Printf(">> 通知サービス: ユーザーID: %s のサブスクリプションが空です\n", user.ID)
@@ -116,14 +116,15 @@ func (s *NotificationService) SendNotification(user model.User, setting model.No
 		return fmt.Errorf("VAPID鍵が設定されていません")
 	}
 
-	// 通知内容の作成
+	// 通知内容の作成（連続服薬日数を含める）
 	notificationData := NotificationData{
 		Title: "お薬通知",
 		Body:  message,
 		Data: map[string]string{
-			"messageId": fmt.Sprintf("medication-%d", time.Now().UnixNano()),
-			"timestamp": fmt.Sprintf("%d", time.Now().Unix()),
-			"userId":    user.ID,
+			"messageId":       fmt.Sprintf("medication-%d", time.Now().UnixNano()),
+			"timestamp":       fmt.Sprintf("%d", time.Now().Unix()),
+			"userId":          user.ID,
+			"consecutiveDays": fmt.Sprintf("%d", consecutiveDays),
 		},
 	}
 
@@ -164,4 +165,9 @@ func (s *NotificationService) SendNotification(user model.User, setting model.No
 	fmt.Printf(">> 通知サービス: ユーザーID %s の処理完了\n", user.ID)
 
 	return nil
+}
+
+// SendNotification は通知を送信する（後方互換性のため）
+func (s *NotificationService) SendNotification(user model.User, setting model.NotificationSetting, message string) error {
+	return s.SendNotificationWithDays(user, setting, message, 0)
 }

@@ -24,6 +24,7 @@ func SetupRoutes() *gin.Engine {
 		notificationRepo,
 		userRepo,
 		notificationService,
+		medicationRepo,
 	)
 
 	// Ginのルーターを作成
