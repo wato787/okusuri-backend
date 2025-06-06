@@ -76,7 +76,9 @@ func (s *NotificationService) markAsSent(subKey string) {
 }
 
 // SendNotificationWithDays は連続服薬日数を含めて通知を送信する
-func (s *NotificationService) SendNotificationWithDays(user model.User, setting model.NotificationSetting, message string, consecutiveDays int) error {
+func (s *NotificationService) SendNotificationWithDays(
+	user model.User, setting model.NotificationSetting, message string, consecutiveDays int,
+) error {
 	// subscriptionが空の場合
 	if setting.Subscription == "" {
 		fmt.Printf(">> 通知サービス: ユーザーID: %s のサブスクリプションが空です\n", user.ID)
@@ -168,6 +170,8 @@ func (s *NotificationService) SendNotificationWithDays(user model.User, setting 
 }
 
 // SendNotification は通知を送信する（後方互換性のため）
-func (s *NotificationService) SendNotification(user model.User, setting model.NotificationSetting, message string) error {
+func (s *NotificationService) SendNotification(
+	user model.User, setting model.NotificationSetting, message string,
+) error {
 	return s.SendNotificationWithDays(user, setting, message, 0)
 }

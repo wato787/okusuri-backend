@@ -13,7 +13,8 @@ linters-settings:
     local-prefixes: okusuri-backend
   
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
   
   gocyclo:
     min-complexity: 15
