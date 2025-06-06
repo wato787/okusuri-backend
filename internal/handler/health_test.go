@@ -15,7 +15,7 @@ func TestHealthCheck(t *testing.T) {
 
 	// テスト用のルーターを作成
 	router := gin.New()
-	
+
 	// ヘルスチェックエンドポイントを追加
 	router.GET("/api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
