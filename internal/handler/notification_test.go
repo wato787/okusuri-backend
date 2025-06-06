@@ -84,9 +84,9 @@ func TestNotificationHandler_RegisterSetting(t *testing.T) {
 
 		// リクエストの作成（ユーザーIDなし）
 		requestBody := dto.RegisterNotificationSettingRequest{
-			Subscription: "test", 
-			IsEnabled: true,
-			Platform: "web",
+			Subscription: "test",
+			IsEnabled:    true,
+			Platform:     "web",
 		}
 		c, w := createTestContext("POST", "/api/notification/setting", requestBody, "")
 
@@ -123,9 +123,9 @@ func TestNotificationHandler_New(t *testing.T) {
 		userRepo := repository.NewUserRepository()
 		notificationSvc := service.NewNotificationService()
 		medicationRepo := repository.NewMedicationRepository()
-		
+
 		medicationSvc := service.NewMedicationService(medicationRepo)
-		
+
 		handler := NewNotificationHandler(
 			notificationRepo,
 			userRepo,
@@ -133,7 +133,7 @@ func TestNotificationHandler_New(t *testing.T) {
 			medicationRepo,
 			medicationSvc,
 		)
-		
+
 		assert.NotNil(t, handler)
 		assert.Equal(t, notificationRepo, handler.notificationRepo)
 		assert.Equal(t, userRepo, handler.userRepo)

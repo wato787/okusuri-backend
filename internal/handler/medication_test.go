@@ -18,24 +18,24 @@ import (
 // テスト用のgin.Contextを作成する関数
 func createTestContext(method, path string, body interface{}, userID string) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
-	
+
 	var bodyBytes []byte
 	if body != nil {
 		bodyBytes, _ = json.Marshal(body)
 	}
-	
+
 	req := httptest.NewRequest(method, path, bytes.NewBuffer(bodyBytes))
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = req
-	
+
 	// ユーザーIDをコンテキストに設定
 	if userID != "" {
 		c.Set("userID", userID)
 	}
-	
+
 	return c, w
 }
 
@@ -48,7 +48,7 @@ func TestMedicationHandler_RegisterLog(t *testing.T) {
 			HasBleeding: true,
 			Date:        &testDate,
 		}
-		
+
 		assert.True(t, req.HasBleeding)
 		assert.Equal(t, testDate, *req.Date)
 	})
@@ -145,7 +145,7 @@ func TestMedicationHandler_GetLogByID(t *testing.T) {
 	t.Run("パラメータの構造テスト", func(t *testing.T) {
 		// パラメータの基本構造をテスト
 		params := []gin.Param{{Key: "id", Value: "1"}}
-		
+
 		assert.Len(t, params, 1)
 		assert.Equal(t, "id", params[0].Key)
 		assert.Equal(t, "1", params[0].Value)
@@ -178,7 +178,7 @@ func TestMedicationHandler_UpdateLog(t *testing.T) {
 	t.Run("更新リクエストの構造テスト", func(t *testing.T) {
 		// 更新リクエストの基本構造をテスト
 		requestBody := dto.MedicationLogRequest{HasBleeding: true}
-		
+
 		assert.True(t, requestBody.HasBleeding)
 		assert.Nil(t, requestBody.Date)
 	})
@@ -189,7 +189,7 @@ func TestMedicationHandler_New(t *testing.T) {
 	t.Run("MedicationHandlerが正常に作成される", func(t *testing.T) {
 		repo := repository.NewMedicationRepository()
 		handler := NewMedicationHandler(repo)
-		
+
 		assert.NotNil(t, handler)
 		assert.Equal(t, repo, handler.medicationRepo)
 	})

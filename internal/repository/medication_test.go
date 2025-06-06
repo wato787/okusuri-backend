@@ -50,7 +50,7 @@ func (m *MockDB) Order(value interface{}) *gorm.DB {
 func TestMedicationRepository_NewMedicationRepository(t *testing.T) {
 	t.Run("MedicationRepositoryが正常に作成される", func(t *testing.T) {
 		repo := NewMedicationRepository()
-		
+
 		assert.NotNil(t, repo)
 	})
 }
@@ -63,14 +63,14 @@ func TestMedicationRepository_CreateLog(t *testing.T) {
 		userID := "test-user-1"
 		hasBleedingFlag := true
 		createdAt := time.Now()
-		
+
 		// ログの構造が正しいことを確認
 		log := model.MedicationLog{
 			UserID:      userID,
 			HasBleeding: hasBleedingFlag,
 			CreatedAt:   createdAt,
 		}
-		
+
 		assert.Equal(t, userID, log.UserID)
 		assert.Equal(t, hasBleedingFlag, log.HasBleeding)
 		assert.Equal(t, createdAt, log.CreatedAt)
@@ -83,7 +83,7 @@ func TestMedicationRepository_GetLogs(t *testing.T) {
 		// 実際のGORMを使った統合テストは複雑になるため、
 		// ここでは基本的な構造体の検証を行う
 		userID := "test-user-1"
-		
+
 		// ダミーログの作成
 		logs := []model.MedicationLog{
 			{
@@ -99,7 +99,7 @@ func TestMedicationRepository_GetLogs(t *testing.T) {
 				CreatedAt:   time.Now().Add(-24 * time.Hour),
 			},
 		}
-		
+
 		// ログの構造が正しいことを確認
 		assert.Len(t, logs, 2)
 		assert.Equal(t, userID, logs[0].UserID)
@@ -116,7 +116,7 @@ func TestMedicationRepository_GetLogByID(t *testing.T) {
 		// ここでは基本的な構造体の検証を行う
 		userID := "test-user-1"
 		logID := uint(1)
-		
+
 		// ダミーログの作成
 		log := &model.MedicationLog{
 			ID:          logID,
@@ -124,7 +124,7 @@ func TestMedicationRepository_GetLogByID(t *testing.T) {
 			HasBleeding: true,
 			CreatedAt:   time.Now(),
 		}
-		
+
 		// ログの構造が正しいことを確認
 		assert.NotNil(t, log)
 		assert.Equal(t, logID, log.ID)
@@ -141,7 +141,7 @@ func TestMedicationRepository_UpdateLog(t *testing.T) {
 		userID := "test-user-1"
 		logID := uint(1)
 		newBleedingFlag := false
-		
+
 		// 更新前のログ
 		originalLog := model.MedicationLog{
 			ID:          logID,
@@ -149,11 +149,11 @@ func TestMedicationRepository_UpdateLog(t *testing.T) {
 			HasBleeding: true,
 			CreatedAt:   time.Now(),
 		}
-		
+
 		// 更新操作のシミュレーション
 		originalLog.HasBleeding = newBleedingFlag
 		originalLog.UpdatedAt = time.Now()
-		
+
 		// 更新後の値が正しいことを確認
 		assert.Equal(t, logID, originalLog.ID)
 		assert.Equal(t, userID, originalLog.UserID)
@@ -168,7 +168,7 @@ func TestMedicationRepository_GetConsecutiveDays(t *testing.T) {
 		// 実際のGORMを使った統合テストは複雑になるため、
 		// ここでは基本的なロジックの検証を行う
 		userID := "test-user-1"
-		
+
 		// ダミーログの作成（連続する日付）
 		now := time.Now()
 		logs := []model.MedicationLog{
@@ -191,14 +191,14 @@ func TestMedicationRepository_GetConsecutiveDays(t *testing.T) {
 				CreatedAt:   now.Add(-48 * time.Hour),
 			},
 		}
-		
+
 		// ログの構造が正しいことを確認
 		assert.Len(t, logs, 3)
 		for _, log := range logs {
 			assert.Equal(t, userID, log.UserID)
 			assert.False(t, log.HasBleeding) // 連続服薬の場合は出血なし
 		}
-		
+
 		// 日付が連続していることを確認
 		assert.True(t, logs[0].CreatedAt.After(logs[1].CreatedAt))
 		assert.True(t, logs[1].CreatedAt.After(logs[2].CreatedAt))
