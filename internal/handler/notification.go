@@ -18,6 +18,7 @@ type NotificationHandler struct {
 	userRepo         *repository.UserRepository
 	notificationSvc  *service.NotificationService
 	medicationRepo   *repository.MedicationRepository
+	medicationSvc    *service.MedicationService
 }
 
 func NewNotificationHandler(
@@ -25,12 +26,14 @@ func NewNotificationHandler(
 	userRepo *repository.UserRepository,
 	notificationSvc *service.NotificationService,
 	medicationRepo *repository.MedicationRepository,
+	medicationSvc *service.MedicationService,
 ) *NotificationHandler {
 	return &NotificationHandler{
 		notificationRepo: notificationRepo,
 		userRepo:         userRepo,
 		notificationSvc:  notificationSvc,
 		medicationRepo:   medicationRepo,
+		medicationSvc:    medicationSvc,
 	}
 }
 
@@ -167,22 +170,24 @@ func (h *NotificationHandler) SendNotification(c *gin.Context) {
 		fmt.Printf("ユーザーID: %s に通知送信中 (サブスクリプション: %s)\n",
 			user.ID, getPreview(setting.Subscription))
 
-		// 連続服薬日数を取得
-		consecutiveDays, err := h.medicationRepo.GetConsecutiveDays(user.ID)
+		// 薬のステータスを取得
+		medicationStatus, err := h.medicationSvc.GetMedicationStatus(user.ID)
 		if err != nil {
-			fmt.Printf("エラー: 連続服薬日数の取得に失敗: %v\n", err)
-			consecutiveDays = 0 // エラーの場合は0日として処理
+			fmt.Printf("エラー: 薬のステータス取得に失敗: %v\n", err)
+			// エラーの場合はデフォルトメッセージ
+			message := "お薬の時間です。忘れずに服用してください。"
+			err = h.notificationSvc.SendNotificationWithDays(user, setting, message, 0)
+			if err != nil {
+				fmt.Printf("エラー: 通知送信失敗: %v\n", err)
+				continue
+			}
+			continue
 		}
 
-		// 連続服薬日数を含むメッセージを作成
-		var message string
-		if consecutiveDays > 0 {
-			message = fmt.Sprintf("お薬の時間です。忘れずに服用してください。（連続%d日目）", consecutiveDays)
-		} else {
-			message = "お薬の時間です。忘れずに服用してください。"
-		}
+		// ステータスに応じたメッセージを生成
+		message := h.generateStatusBasedMessage(medicationStatus)
 
-		err = h.notificationSvc.SendNotificationWithDays(user, setting, message, consecutiveDays)
+		err = h.notificationSvc.SendNotificationWithDays(user, setting, message, medicationStatus.CurrentStreak)
 		if err != nil {
 			fmt.Printf("エラー: 通知送信失敗: %v\n", err)
 			// エラーがあっても処理を続行
@@ -220,4 +225,23 @@ func getPreview(str string) string {
 		return str
 	}
 	return str[:10] + "..."
+}
+
+// generateStatusBasedMessage はユーザーの薬のステータスに応じた通知メッセージを生成する
+func (h *NotificationHandler) generateStatusBasedMessage(status *dto.MedicationStatusResponse) string {
+	if status.IsRestPeriod {
+		// 休薬期間中のメッセージ
+		if status.RestDaysLeft > 0 {
+			return fmt.Sprintf("現在休薬期間中です。あと%d日で服薬を再開してください。", status.RestDaysLeft)
+		} else {
+			return "休薬期間が終了しました。本日から服薬を再開してください。"
+		}
+	} else {
+		// 通常の服薬期間のメッセージ
+		if status.CurrentStreak > 0 {
+			return fmt.Sprintf("お薬の時間です。忘れずに服用してください。（連続%d日目）", status.CurrentStreak)
+		} else {
+			return "お薬の時間です。忘れずに服用してください。"
+		}
+	}
 }
