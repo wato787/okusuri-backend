@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"okusuri-backend/internal/model"
 	"okusuri-backend/pkg/config"
+	"time"
 )
 
 type MedicationRepository struct{}
@@ -73,4 +74,51 @@ func (r *MedicationRepository) UpdateLog(userID string, logID uint, hasBleeding 
 	}
 
 	return nil
+}
+
+// GetConsecutiveDays はユーザーの連続服薬日数を計算する
+func (r *MedicationRepository) GetConsecutiveDays(userID string) (int, error) {
+	db := config.DB
+	
+	// ユーザーの服薬ログを日付降順で取得
+	var logs []model.MedicationLog
+	if err := db.Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Find(&logs).Error; err != nil {
+		return 0, err
+	}
+	
+	if len(logs) == 0 {
+		return 0, nil
+	}
+	
+	// 連続日数をカウント
+	consecutiveDays := 1
+	today := time.Now().Truncate(24 * time.Hour)
+	
+	// 最新の記録が今日かどうかチェック
+	latestLog := logs[0]
+	latestDate := latestLog.CreatedAt.Truncate(24 * time.Hour)
+	
+	// 最新の記録が今日でない場合は連続日数は0
+	if !latestDate.Equal(today) {
+		return 0, nil
+	}
+	
+	// 前日から遡って連続日数をカウント
+	expectedDate := today.AddDate(0, 0, -1)
+	
+	for i := 1; i < len(logs); i++ {
+		logDate := logs[i].CreatedAt.Truncate(24 * time.Hour)
+		
+		if logDate.Equal(expectedDate) {
+			consecutiveDays++
+			expectedDate = expectedDate.AddDate(0, 0, -1)
+		} else {
+			// 連続していない場合は終了
+			break
+		}
+	}
+	
+	return consecutiveDays, nil
 }
