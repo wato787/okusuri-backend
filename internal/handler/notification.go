@@ -135,7 +135,9 @@ func (h *NotificationHandler) fetchUsersAndSettings(c *gin.Context) ([]model.Use
 }
 
 // buildSettingsMap は通知設定をユーザーIDでマップ化する
-func (h *NotificationHandler) buildSettingsMap(settings []model.NotificationSetting) map[string]model.NotificationSetting {
+func (h *NotificationHandler) buildSettingsMap(
+	settings []model.NotificationSetting,
+) map[string]model.NotificationSetting {
 	settingsMap := make(map[string]model.NotificationSetting)
 	for _, setting := range settings {
 		existingSetting, exists := settingsMap[setting.UserID]
@@ -148,7 +150,9 @@ func (h *NotificationHandler) buildSettingsMap(settings []model.NotificationSett
 }
 
 // processNotifications は各ユーザーに通知を送信する
-func (h *NotificationHandler) processNotifications(users []model.User, settingsMap map[string]model.NotificationSetting) int {
+func (h *NotificationHandler) processNotifications(
+	users []model.User, settingsMap map[string]model.NotificationSetting,
+) int {
 	sentSubs := make(map[string]bool)
 	fmt.Println("----- 通知送信処理開始 -----")
 
@@ -163,7 +167,9 @@ func (h *NotificationHandler) processNotifications(users []model.User, settingsM
 }
 
 // sendUserNotification は個別ユーザーに通知を送信する
-func (h *NotificationHandler) sendUserNotification(user model.User, settingsMap map[string]model.NotificationSetting, sentSubs map[string]bool) bool {
+func (h *NotificationHandler) sendUserNotification(
+	user model.User, settingsMap map[string]model.NotificationSetting, sentSubs map[string]bool,
+) bool {
 	setting, ok := settingsMap[user.ID]
 	if !ok || !setting.IsEnabled {
 		return false
@@ -213,18 +219,6 @@ func (h *NotificationHandler) logAndRespond(c *gin.Context, requestTime time.Tim
 	})
 	fmt.Printf("========== 通知送信処理終了 [%s] ==========\n\n",
 		time.Now().Format("2006-01-02 15:04:05"))
-}
-
-// トークンやサブスクリプションの先頭数文字を取得するヘルパー関数
-func getPreview(str string) string {
-	if str == "" {
-		return "空"
-	}
-
-	if len(str) <= 10 {
-		return str
-	}
-	return str[:10] + "..."
 }
 
 // generateStatusBasedMessage はユーザーの薬のステータスに応じた通知メッセージを生成する
