@@ -261,7 +261,7 @@ func (s *MedicationService) GetMedicationStats(userID string) (*dto.MedicationSt
 	monthlyRate := s.calculateMonthlyMedicationRate(logs)
 
 	return &dto.MedicationStatsResponse{
-		LongestContinuousDays:  longestStreak,
+		LongestContinuousDays: longestStreak,
 		TotalBleedingDays:     totalBleedingDays,
 		MedicationBreaks:      medicationBreaks,
 		AverageCycleLength:    averageCycleLength,
