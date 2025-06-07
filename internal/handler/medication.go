@@ -163,3 +163,23 @@ func (h *MedicationHandler) GetMedicationStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, status)
 }
+
+// GetMedicationStats は服薬統計を取得するハンドラー
+func (h *MedicationHandler) GetMedicationStats(c *gin.Context) {
+	// ユーザーIDを取得
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// サービスから服薬統計を取得
+	medicationService := service.NewMedicationService(h.medicationRepo)
+	stats, err := medicationService.GetMedicationStats(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get medication stats"})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}
