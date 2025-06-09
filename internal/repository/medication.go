@@ -122,3 +122,18 @@ func (r *MedicationRepository) GetConsecutiveDays(userID string) (int, error) {
 
 	return consecutiveDays, nil
 }
+
+// GetStatsData はユーザーの統計データを取得する
+func (r *MedicationRepository) GetStatsData(userID string) ([]model.MedicationLog, error) {
+	db := config.DB
+
+	// ユーザーの全服薬ログを日付順で取得
+	var logs []model.MedicationLog
+	if err := db.Where("user_id = ?", userID).
+		Order("created_at ASC").
+		Find(&logs).Error; err != nil {
+		return nil, err
+	}
+
+	return logs, nil
+}
