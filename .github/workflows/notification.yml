@@ -3,7 +3,7 @@ name: Daily Medication Notification
 
 on:
   schedule:
-    - cron: '50 11 * * *'
+    - cron: '50 12 * * *'
   workflow_dispatch:
 
 jobs:
