@@ -12,6 +12,8 @@ import (
 func SetupRoutes() *gin.Engine {
 	// リポジトリの初期化
 	userRepo := repository.NewUserRepository()
+	sessionRepo := repository.NewSessionRepository(userRepo.GetDB())
+	accountRepo := repository.NewAccountRepository(userRepo.GetDB())
 	medicationRepo := repository.NewMedicationRepository()
 	notificationRepo := repository.NewNotificationRepository()
 
@@ -20,6 +22,7 @@ func SetupRoutes() *gin.Engine {
 	medicationService := service.NewMedicationService(medicationRepo)
 
 	// ハンドラーの初期化
+	authHandler := handler.NewAuthHandler(userRepo, sessionRepo, accountRepo)
 	medicationHandler := handler.NewMedicationHandler(medicationRepo)
 	notificationHandler := handler.NewNotificationHandler(
 		notificationRepo,
@@ -43,6 +46,15 @@ func SetupRoutes() *gin.Engine {
 				"status": "ok",
 			})
 		})
+
+		// 認証関連のエンドポイント
+		auth := api.Group("/auth")
+		{
+			auth.GET("/google", authHandler.SignInWithGoogle)
+			auth.GET("/callback/google", authHandler.GoogleCallback)
+			auth.GET("/session", authHandler.GetSession)
+			auth.POST("/signout", authHandler.SignOut)
+		}
 
 		api.POST(("/notification"), notificationHandler.SendNotification)
 

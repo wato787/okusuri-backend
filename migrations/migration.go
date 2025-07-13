@@ -12,7 +12,14 @@ func RunMigrations(db *gorm.DB) {
 	log.Println("マイグレーションを実行します...")
 
 	// マイグレーション対象のモデルをここに追加
-	err := db.AutoMigrate(&model.NotificationSetting{}, &model.MedicationLog{})
+	err := db.AutoMigrate(
+		&model.User{},
+		&model.Session{},
+		&model.Account{},
+		&model.Verification{},
+		&model.NotificationSetting{}, 
+		&model.MedicationLog{},
+	)
 	if err != nil {
 		log.Fatalf("マイグレーションに失敗しました: %v", err)
 	}
