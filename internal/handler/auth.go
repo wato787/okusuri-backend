@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"okusuri-backend/internal/model"
 	"okusuri-backend/internal/repository"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // AuthHandler は認証関連のハンドラー
@@ -102,6 +103,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	// Accountレコードを作成/更新
 	err = h.createOrUpdateAccount(user.ID, "google", userInfo.ID, token)
 	if err != nil {
+		fmt.Printf("アカウント情報更新エラー: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "アカウント情報更新に失敗しました"})
 		return
 	}
@@ -294,15 +296,27 @@ func (h *AuthHandler) createSession(userID, ipAddress, userAgent string) (*model
 
 // createOrUpdateAccount はアカウント情報を作成または更新
 func (h *AuthHandler) createOrUpdateAccount(userID, providerID, accountID, accessToken string) error {
+	fmt.Printf("createOrUpdateAccount開始: userID=%s, providerID=%s, accountID=%s\n", userID, providerID, accountID)
+
 	account, err := h.accountRepo.FindByProviderAndAccountID(providerID, accountID)
+	if err != nil {
+		fmt.Printf("既存アカウント検索エラー: %v\n", err)
+	}
+
 	if err == nil && account != nil {
 		// 既存アカウントを更新
+		fmt.Printf("既存アカウントを更新: %s\n", account.ID)
 		account.AccessToken = &accessToken
 		account.UpdatedAt = time.Now()
-		return h.accountRepo.Update(account)
+		err = h.accountRepo.Update(account)
+		if err != nil {
+			fmt.Printf("アカウント更新エラー: %v\n", err)
+		}
+		return err
 	}
 
 	// 新規アカウントを作成
+	fmt.Printf("新規アカウントを作成\n")
 	newAccount := &model.Account{
 		ID:          uuid.New().String(),
 		AccountID:   accountID,
@@ -313,7 +327,11 @@ func (h *AuthHandler) createOrUpdateAccount(userID, providerID, accountID, acces
 		UpdatedAt:   time.Now(),
 	}
 
-	return h.accountRepo.Create(newAccount)
+	err = h.accountRepo.Create(newAccount)
+	if err != nil {
+		fmt.Printf("アカウント作成エラー: %v\n", err)
+	}
+	return err
 }
 
 // extractToken はリクエストからトークンを抽出

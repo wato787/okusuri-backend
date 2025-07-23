@@ -35,19 +35,19 @@ func (Session) TableName() string {
 
 // Account モデル
 type Account struct {
-	ID                    string     `json:"id" gorm:"primary_key"`
-	AccountID             string     `json:"accountId"`
-	ProviderID            string     `json:"providerId"`
-	UserID                string     `json:"userId"`
-	AccessToken           *string    `json:"accessToken"`
-	RefreshToken          *string    `json:"refreshToken"`
-	IDToken               *string    `json:"idToken"`
-	AccessTokenExpiresAt  *time.Time `json:"accessTokenExpiresAt"`
-	RefreshTokenExpiresAt *time.Time `json:"refreshTokenExpiresAt"`
-	Scope                 *string    `json:"scope"`
-	Password              *string    `json:"password"`
-	CreatedAt             time.Time  `json:"createdAt"`
-	UpdatedAt             time.Time  `json:"updatedAt"`
+	ID                    string     `json:"id" gorm:"primary_key;column:id"`
+	AccountID             string     `json:"accountId" gorm:"column:accountId"`
+	ProviderID            string     `json:"providerId" gorm:"column:providerId"`
+	UserID                string     `json:"userId" gorm:"column:userId"`
+	AccessToken           *string    `json:"accessToken" gorm:"column:accessToken"`
+	RefreshToken          *string    `json:"refreshToken" gorm:"column:refreshToken"`
+	IDToken               *string    `json:"idToken" gorm:"column:idToken"`
+	AccessTokenExpiresAt  *time.Time `json:"accessTokenExpiresAt" gorm:"column:accessTokenExpiresAt"`
+	RefreshTokenExpiresAt *time.Time `json:"refreshTokenExpiresAt" gorm:"column:refreshTokenExpiresAt"`
+	Scope                 *string    `json:"scope" gorm:"column:scope"`
+	Password              *string    `json:"password" gorm:"column:password"`
+	CreatedAt             time.Time  `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedAt             time.Time  `json:"updatedAt" gorm:"column:updatedAt"`
 }
 
 func (Account) TableName() string {
