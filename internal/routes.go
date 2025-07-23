@@ -60,7 +60,6 @@ func SetupRoutes() *gin.Engine {
 
 		// 新しいエンドポイントを追加
 		api.GET("/medication-status", middleware.Auth(userRepo), medicationHandler.GetMedicationStatus)
-		api.GET("/medication-stats", middleware.Auth(userRepo), medicationHandler.GetMedicationStats)
 
 		notificationSetting := api.Group("/notification/setting")
 		notificationSetting.Use(middleware.Auth(userRepo))
