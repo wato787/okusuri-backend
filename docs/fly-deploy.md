@@ -4,6 +4,7 @@
 
 ## 事前準備
 - Fly.io アカウントの作成
+- mise CLI のインストール（`curl https://mise.run | sh`）
 - `flyctl` CLI のインストール
   ```bash
   curl -L https://fly.io/install.sh | sh
@@ -15,7 +16,7 @@
 2. `fly.toml` の `app` 名が一意であることを確認し、必要に応じて変更します。
 3. 既存構成を用いてアプリを作成します。
    ```bash
-   make fly-launch
+   mise run fly-launch
    ```
    `--copy-config` オプションを利用しているため、`fly.toml` の内容がそのまま反映されます。
 
@@ -31,19 +32,19 @@
 - `VAPID_PRIVATE_KEY`: Web Push VAPID 秘密鍵
 
 ```bash
-make fly-secrets SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
+mise run fly-secrets -- SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
 # もしくは直接 fly secrets set KEY=VALUE ... を実行
 ```
 
 ## デプロイ
 ```bash
-make fly-deploy
+mise run fly-deploy
 ```
 
 `fly.toml` に設定されている `min_machines_running = 1` により、最低1台の Machine が常時稼働しコールドスタートを防ぎます。ローリングデプロイ戦略を採用しているため、リリース時のダウンタイムを最小化できます。
 
 ## 運用コマンド例
-- ステータス確認: `make fly-status`
+- ステータス確認: `mise run fly-status`
 - ログ監視: `fly logs`
 - スケール調整: `fly scale vm shared-cpu-1x`、`fly scale memory 512`
 - 強制再起動: `fly machine restart <machine_id>`

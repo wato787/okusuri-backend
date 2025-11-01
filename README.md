@@ -134,17 +134,23 @@ type NotificationSetting struct {
 
 ### セットアップ
 
-1. **依存関係のインストール**
+1. **mise のインストール**
    ```bash
-   make install-deps
+   curl https://mise.run | sh
    ```
 
-2. **Airのインストール**
+2. **ツールのセットアップ**  
+   `.mise.toml` に従って Go などをインストールします。
    ```bash
-   make install-air
+   mise install
    ```
 
-3. **環境変数の設定**
+3. **依存関係のインストール**
+   ```bash
+   mise run install-deps
+   ```
+
+4. **環境変数の設定**
    ```bash
    # .envファイルを作成
    DATABASE_URL="postgres://username:password@localhost:5432/dbname"
@@ -152,19 +158,19 @@ type NotificationSetting struct {
    APP_URL="http://localhost:3000"
    ```
 
-4. **開発サーバーの起動**
+5. **開発サーバーの起動**
    ```bash
-   make dev  # ホットリロード有効
+   mise run dev  # ホットリロード有効
    ```
 
 ### 開発コマンド
 
 ```bash
-make dev      # 開発モード（ホットリロード）
-make build    # ビルド
-make run      # ビルドして実行
-make test     # テスト実行
-make clean    # クリーンアップ
+mise run dev          # 開発モード（ホットリロード）
+mise run build        # ビルド
+mise run run          # ビルドして実行
+mise run test         # テスト実行
+mise run clean        # クリーンアップ
 ```
 
 ## 設計パターン
@@ -245,7 +251,7 @@ Fly.io を利用すると、`min_machines_running = 1` を維持した常時起�
 3. **初期セットアップ**  
    既存の `fly.toml` を利用してアプリを作成します。
    ```bash
-   make fly-launch
+   mise run fly-launch
    ```
 
 4. **シークレットの登録**  
@@ -259,18 +265,18 @@ Fly.io を利用すると、`min_machines_running = 1` を維持した常時起�
    - `VAPID_PRIVATE_KEY`
 
    ```bash
-   make fly-secrets SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
+   mise run fly-secrets -- SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
    # もしくは fly secrets set KEY=VALUE ... を直接実行
    ```
 
 5. **デプロイ**  
    ```bash
-   make fly-deploy
+   mise run fly-deploy
    ```
 
 6. **稼働確認**  
    ```bash
-   make fly-status
+   mise run fly-status
    ```
 
 `fly.toml` では `min_machines_running = 1` および `auto_stop_machines = false` を設定しており、コールドスタートを避けながら HTTP ヘルスチェック (`/api/health`) で稼働監視を行います。DB は Fly Postgres もしくは外部のマネージド PostgreSQL を利用してください。

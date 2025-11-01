@@ -1,0 +1,52 @@
+[tools]
+go = "1.22.2"
+
+[env]
+GOTOOLCHAIN = "local"
+
+[tasks.install-air]
+description = "Airをインストール"
+run = "go install github.com/air-verse/air@latest"
+
+[tasks.dev]
+description = "開発モードで実行（ホットリロード）"
+depends = ["install-air"]
+run = "air"
+
+[tasks.install-deps]
+description = "Go依存関係をダウンロード"
+run = "go mod download"
+
+[tasks.build]
+description = "サーバーバイナリをビルド"
+run = "go build -o ./bin/server ./cmd/server"
+
+[tasks.run]
+description = "ビルド済みバイナリを実行"
+depends = ["build"]
+run = "./bin/server"
+
+[tasks.test]
+description = "テストを実行"
+run = "go test -v ./..."
+
+[tasks.clean]
+description = "生成物をクリーンアップ"
+run = "rm -rf ./bin ./tmp"
+
+[tasks.fly-launch]
+description = "Fly.ioアプリを既存設定から作成"
+run = "fly launch --copy-config --no-deploy --yes"
+
+[tasks.fly-deploy]
+description = "Fly.ioへデプロイ"
+run = "fly deploy --strategy rolling --wait-timeout 300"
+
+[tasks.fly-status]
+description = "Fly.ioのアプリ稼働状況を確認"
+run = "fly status"
+
+[tasks.fly-secrets]
+description = "Fly.ioシークレットを登録"
+env = { SECRET = "" }
+run = "test -n \"$SECRET\" && fly secrets set $SECRET || { echo 'SECRET変数に設定値を指定してください (例: mise run fly-secrets -- SECRET=\"DATABASE_URL=...\")'; exit 1; }"
