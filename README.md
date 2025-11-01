@@ -244,7 +244,6 @@ Fly.io を利用すると、`min_machines_running = 1` を維持した常時起�
 1. **必要ツールのインストール**  
    ```bash
    mise install             # go / air / flyctl などをセットアップ
-   mise run install-flyctl  # flyctl がまだ無い場合のみ
    ```
 
 2. **Fly.io ログイン**  

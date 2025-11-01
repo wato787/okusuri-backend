@@ -1,5 +1,6 @@
 [tools]
 go = "1.23.2"
+flyctl = "latest"
 
 [env]
 GOTOOLCHAIN = "local"
@@ -33,10 +34,6 @@ run = "go test -v ./..."
 [tasks.clean]
 description = "生成物をクリーンアップ"
 run = "rm -rf ./bin ./tmp"
-
-[tasks.install-flyctl]
-description = "Fly.io CLIをインストール"
-run = "curl -L https://fly.io/install.sh | sh"
 
 [tasks.fly-login]
 description = "Fly.ioにログイン"

@@ -8,7 +8,6 @@
 - ツールのセットアップ
   ```bash
   mise install
-  mise run install-flyctl   # flyctl が未インストールの場合のみ
   ```
 - Fly.io で利用するリージョンの決定（本プロジェクトでは `nrt` を想定）
 
