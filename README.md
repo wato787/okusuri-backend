@@ -12,7 +12,7 @@
 - **RESTful API**設計に準拠
 
 ### 🔧 技術スタック
-- **言語**: Go 1.24
+- **言語**: Go 1.23
 - **Webフレームワーク**: Gin
 - **データベース**: PostgreSQL + GORM ORM
 - **認証**: Google OAuth 2.0 + JWT
@@ -128,7 +128,7 @@ type NotificationSetting struct {
 ## 開発環境
 
 ### 前提条件
-- Go 1.24以上
+- Go 1.23以上
 - PostgreSQL
 - Air（ホットリロード用）
 

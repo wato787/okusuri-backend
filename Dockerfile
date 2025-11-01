@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.22.2 AS builder
+FROM golang:1.23.2 AS builder
 WORKDIR /app
 
-# Go 1.24 ツールチェーンが未提供のため、ローカルツールチェーンを強制
+# GOTOOLCHAIN を local に固定してコンテナ内で追加ダウンロードを防ぐ
 ENV GOTOOLCHAIN=local
 ENV CGO_ENABLED=0
 ENV GOOS=linux
