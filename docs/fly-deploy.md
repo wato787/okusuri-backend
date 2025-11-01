@@ -33,7 +33,7 @@
 - `VAPID_PRIVATE_KEY`: Web Push VAPID 秘密鍵
 
 ```bash
-mise run fly-secrets -- SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
+SECRET="DATABASE_URL=postgres://... APP_URL=https://..." mise run fly-secrets
 # もしくは直接 fly secrets set KEY=VALUE ... を実行
 ```
 

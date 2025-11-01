@@ -59,6 +59,15 @@ run = "fly status"
 
 [tasks.fly-secrets]
 description = "Fly.ioシークレットを登録"
-env = { SECRET = "" }
 depends = ["fly-login"]
-run = "test -n \"$SECRET\" && fly secrets set $SECRET || { echo 'SECRET変数に設定値を指定してください (例: mise run fly-secrets -- SECRET=\"DATABASE_URL=...\")'; exit 1; }"
+shell = true
+run = '''
+set -e
+if [ -z "${SECRET:-}" ]; then
+  echo 'SECRET環境変数に設定値を指定してください (例: SECRET="DATABASE_URL=... APP_URL=..." mise run fly-secrets)'
+  exit 1
+fi
+set -f
+set -- $SECRET
+fly secrets set "$@"
+'''

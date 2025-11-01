@@ -272,7 +272,7 @@ Fly.io を利用すると、`min_machines_running = 1` を維持した常時起�
    - `VAPID_PRIVATE_KEY`
 
    ```bash
-   mise run fly-secrets -- SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
+   SECRET="DATABASE_URL=postgres://... APP_URL=https://..." mise run fly-secrets
    # もしくは fly secrets set KEY=VALUE ... を直接実行
    ```
 
