@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
-- **Development with hot reload**: `make dev` (uses air for hot reloading)
-- **Build**: `make build` (outputs to ./bin/server)
-- **Run**: `make run` (builds then runs)
-- **Test**: `make test` (runs all tests with -v flag)
-- **Clean**: `make clean` (removes ./bin and ./tmp directories)
+- **Tool installation**: `mise install`
+- **Development with hot reload**: `mise run dev` (Air is installed automatically via the task)
+- **Build**: `mise run build` (outputs to ./bin/server)
+- **Run**: `mise run run` (builds then runs)
+- **Test**: `mise run test` (runs all tests with -v flag)
+- **Clean**: `mise run clean` (removes ./bin and ./tmp directories)
 
 ## Architecture Overview
 
@@ -31,7 +32,7 @@ This is a Go REST API backend for a medication tracking application (`okusuri-ba
 - **Web Framework**: Gin
 - **Database**: PostgreSQL with GORM ORM
 - **Environment**: godotenv for .env loading
-- **Hot Reload**: Air (installed via make dev)
+- **Hot Reload**: Air (invoked via `mise run dev`)
 
 ### Database Setup
 Requires `DATABASE_URL` environment variable. The application automatically runs migrations on startup.
@@ -79,6 +80,6 @@ Uses JWT-based authentication middleware for protected routes. User ID is extrac
 
 ### Development Workflow
 - **Branch Strategy**: Create feature branches from main (`feature/description`)
-- **Testing**: Run tests before committing (`make test`)
-- **Build Verification**: Ensure code builds successfully (`make build`)
-- **Hot Reload**: Use `make dev` for development with hot reload
+- **Testing**: Run tests before committing (`mise run test`)
+- **Build Verification**: Ensure code builds successfully (`mise run build`)
+- **Hot Reload**: Use `mise run dev` for development with hot reload

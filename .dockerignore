@@ -1,0 +1,11 @@
+.git
+tmp
+bin
+.env
+.env.*
+*.log
+node_modules
+.fly
+.idea
+.vscode
+__pycache__

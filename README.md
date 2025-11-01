@@ -12,7 +12,7 @@
 - **RESTful API**設計に準拠
 
 ### 🔧 技術スタック
-- **言語**: Go 1.24
+- **言語**: Go 1.23
 - **Webフレームワーク**: Gin
 - **データベース**: PostgreSQL + GORM ORM
 - **認証**: Google OAuth 2.0 + JWT
@@ -128,23 +128,30 @@ type NotificationSetting struct {
 ## 開発環境
 
 ### 前提条件
-- Go 1.24以上
+- Go 1.23以上
 - PostgreSQL
 - Air（ホットリロード用）
 
 ### セットアップ
 
-1. **依存関係のインストール**
+1. **mise のインストール & パス設定**
    ```bash
-   make install-deps
+   curl https://mise.run | sh
+   exec $SHELL -l
    ```
 
-2. **Airのインストール**
+2. **ツールチェーンのインストール**  
+   `.mise.toml` に従って Go / Air / Fly CLI などを取得します。
    ```bash
-   make install-air
+   mise install
    ```
 
-3. **環境変数の設定**
+3. **依存関係のインストール**
+   ```bash
+   mise run install-deps
+   ```
+
+4. **環境変数の設定**
    ```bash
    # .envファイルを作成
    DATABASE_URL="postgres://username:password@localhost:5432/dbname"
@@ -152,19 +159,19 @@ type NotificationSetting struct {
    APP_URL="http://localhost:3000"
    ```
 
-4. **開発サーバーの起動**
+5. **開発サーバーの起動**
    ```bash
-   make dev  # ホットリロード有効
+   mise run dev  # ホットリロード有効
    ```
 
 ### 開発コマンド
 
 ```bash
-make dev      # 開発モード（ホットリロード）
-make build    # ビルド
-make run      # ビルドして実行
-make test     # テスト実行
-make clean    # クリーンアップ
+mise run dev          # 開発モード（ホットリロード）
+mise run build        # ビルド
+mise run run          # ビルドして実行
+mise run test         # テスト実行
+mise run clean        # クリーンアップ
 ```
 
 ## 設計パターン
@@ -220,7 +227,7 @@ make clean    # クリーンアップ
 
 ### テスト実行
 ```bash
-make test  # 全テスト実行
+mise run test  # 全テスト実行
 go test -v ./internal/handler  # 特定パッケージのテスト
 ```
 
@@ -231,9 +238,58 @@ go test -v ./internal/handler  # 特定パッケージのテスト
 - `GOOGLE_CLIENT_ID`: Google OAuthクライアントID
 - `APP_URL`: アプリケーションのベースURL
 
+### Fly.io への移行
+Fly.io を利用すると、`min_machines_running = 1` を維持した常時起動構成を取りつつ、機械ごとの自動スケールを行えます。本リポジトリには Fly.io 向けのコンテナ設定（`Dockerfile`）とアプリ設定（`fly.toml`）、および mise タスクが整備されています。
+
+1. **必要ツールのインストール**  
+   ```bash
+   mise install             # go / air / flyctl などをセットアップ
+   ```
+
+2. **Fly.io ログイン**  
+   ```bash
+   mise run fly-login
+   ```
+
+3. **アプリ名の設定**  
+   `fly.toml` の `app` 名は Fly.io 全体で一意になる必要があります。必要であれば自分のアプリ名に変更してください。
+
+4. **初期セットアップ**  
+   既存の `fly.toml` を利用してアプリを作成します。
+   ```bash
+   mise run fly-launch
+   ```
+
+5. **シークレットの登録**  
+   Fly.io には環境変数をシークレットとして登録します。最低限以下を設定してください。
+   - `DATABASE_URL`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `APP_URL` (例: `https://your-app.fly.dev`)
+   - `FRONTEND_URL`
+   - `VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
+
+   ```bash
+   SECRET="DATABASE_URL=postgres://... APP_URL=https://..." mise run fly-secrets
+   # もしくは fly secrets set KEY=VALUE ... を直接実行
+   ```
+
+6. **デプロイ**  
+   ```bash
+   mise run fly-deploy
+   ```
+
+7. **稼働確認**  
+   ```bash
+   mise run fly-status
+   ```
+
+`fly.toml` では `min_machines_running = 1` および `auto_stop_machines = false` を設定しており、コールドスタートを避けながら HTTP ヘルスチェック (`/api/health`) で稼働監視を行います。DB は Fly Postgres もしくは外部のマネージド PostgreSQL を利用してください。
+
 ### ビルド
 ```bash
-make build  # バイナリファイル生成
+mise run build  # バイナリファイル生成
 ./bin/server  # サーバー起動
 ```
 

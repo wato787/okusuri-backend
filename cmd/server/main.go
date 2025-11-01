@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	routes "okusuri-backend/internal"
 	"okusuri-backend/migrations"
@@ -19,7 +20,12 @@ func main() {
 	router := routes.SetupRoutes()
 
 	// サーバーを起動
-	if err := router.Run(":8080"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("サーバーの起動に失敗しました: %v", err)
 	}
 }
