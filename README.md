@@ -231,6 +231,50 @@ go test -v ./internal/handler  # 特定パッケージのテスト
 - `GOOGLE_CLIENT_ID`: Google OAuthクライアントID
 - `APP_URL`: アプリケーションのベースURL
 
+### Fly.io への移行
+Fly.io を利用すると、`min_machines_running = 1` を維持した常時起動構成を取りつつ、機械ごとの自動スケールを行えます。本リポジトリには Fly.io 向けのコンテナ設定（`Dockerfile`）とアプリ設定（`fly.toml`）を追加してあります。
+
+1. **flyctl のインストール**
+   ```bash
+   curl -L https://fly.io/install.sh | sh
+   ```
+
+2. **アプリ名の設定**  
+   `fly.toml` の `app` 名は Fly.io 全体で一意になる必要があります。必要であれば自分のアプリ名に変更してください。
+
+3. **初期セットアップ**  
+   既存の `fly.toml` を利用してアプリを作成します。
+   ```bash
+   make fly-launch
+   ```
+
+4. **シークレットの登録**  
+   Fly.io には環境変数をシークレットとして登録します。最低限以下を設定してください。
+   - `DATABASE_URL`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `APP_URL` (例: `https://your-app.fly.dev`)
+   - `FRONTEND_URL`
+   - `VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
+
+   ```bash
+   make fly-secrets SECRET="DATABASE_URL=postgres://... APP_URL=https://..."
+   # もしくは fly secrets set KEY=VALUE ... を直接実行
+   ```
+
+5. **デプロイ**  
+   ```bash
+   make fly-deploy
+   ```
+
+6. **稼働確認**  
+   ```bash
+   make fly-status
+   ```
+
+`fly.toml` では `min_machines_running = 1` および `auto_stop_machines = false` を設定しており、コールドスタートを避けながら HTTP ヘルスチェック (`/api/health`) で稼働監視を行います。DB は Fly Postgres もしくは外部のマネージド PostgreSQL を利用してください。
+
 ### ビルド
 ```bash
 make build  # バイナリファイル生成

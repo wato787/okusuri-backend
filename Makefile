@@ -1,6 +1,6 @@
 # Makefile
 
-.PHONY: dev build run test clean install-deps install-air
+.PHONY: dev build run test clean install-deps install-air fly-launch fly-deploy fly-status fly-secrets
 
 # Get Go bin directory path
 GO_BIN := $(shell go env GOPATH)/bin
@@ -35,3 +35,16 @@ test:
 # クリーンアップ
 clean:
 	rm -rf ./bin ./tmp
+
+fly-launch:
+	fly launch --copy-config --no-deploy --yes
+
+fly-deploy:
+	fly deploy --strategy rolling --wait-timeout 300
+
+fly-status:
+	fly status
+
+fly-secrets:
+	@test -n "$(SECRET)" || (echo "SECRET変数に設定値を指定してください (例: make fly-secrets SECRET=\"DATABASE_URL=...\")" && exit 1)
+	fly secrets set $(SECRET)
