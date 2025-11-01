@@ -134,13 +134,14 @@ type NotificationSetting struct {
 
 ### セットアップ
 
-1. **mise のインストール**
+1. **mise のインストール & パス設定**
    ```bash
    curl https://mise.run | sh
+   exec $SHELL -l
    ```
 
-2. **ツールのセットアップ**  
-   `.mise.toml` に従って Go などをインストールします。
+2. **ツールチェーンのインストール**  
+   `.mise.toml` に従って Go / Air / Fly CLI などを取得します。
    ```bash
    mise install
    ```
@@ -238,23 +239,29 @@ go test -v ./internal/handler  # 特定パッケージのテスト
 - `APP_URL`: アプリケーションのベースURL
 
 ### Fly.io への移行
-Fly.io を利用すると、`min_machines_running = 1` を維持した常時起動構成を取りつつ、機械ごとの自動スケールを行えます。本リポジトリには Fly.io 向けのコンテナ設定（`Dockerfile`）とアプリ設定（`fly.toml`）を追加してあります。
+Fly.io を利用すると、`min_machines_running = 1` を維持した常時起動構成を取りつつ、機械ごとの自動スケールを行えます。本リポジトリには Fly.io 向けのコンテナ設定（`Dockerfile`）とアプリ設定（`fly.toml`）、および mise タスクが整備されています。
 
-1. **flyctl のインストール**
+1. **必要ツールのインストール**  
    ```bash
-   curl -L https://fly.io/install.sh | sh
+   mise install             # go / air / flyctl などをセットアップ
+   mise run install-flyctl  # flyctl がまだ無い場合のみ
    ```
 
-2. **アプリ名の設定**  
+2. **Fly.io ログイン**  
+   ```bash
+   mise run fly-login
+   ```
+
+3. **アプリ名の設定**  
    `fly.toml` の `app` 名は Fly.io 全体で一意になる必要があります。必要であれば自分のアプリ名に変更してください。
 
-3. **初期セットアップ**  
+4. **初期セットアップ**  
    既存の `fly.toml` を利用してアプリを作成します。
    ```bash
    mise run fly-launch
    ```
 
-4. **シークレットの登録**  
+5. **シークレットの登録**  
    Fly.io には環境変数をシークレットとして登録します。最低限以下を設定してください。
    - `DATABASE_URL`
    - `GOOGLE_CLIENT_ID`
@@ -269,12 +276,12 @@ Fly.io を利用すると、`min_machines_running = 1` を維持した常時起�
    # もしくは fly secrets set KEY=VALUE ... を直接実行
    ```
 
-5. **デプロイ**  
+6. **デプロイ**  
    ```bash
    mise run fly-deploy
    ```
 
-6. **稼働確認**  
+7. **稼働確認**  
    ```bash
    mise run fly-status
    ```

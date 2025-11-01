@@ -4,15 +4,16 @@
 
 ## 事前準備
 - Fly.io アカウントの作成
-- mise CLI のインストール（`curl https://mise.run | sh`）
-- `flyctl` CLI のインストール
+- mise CLI のインストール（`curl https://mise.run | sh` を実行し、シェルを再読み込み）
+- ツールのセットアップ
   ```bash
-  curl -L https://fly.io/install.sh | sh
+  mise install
+  mise run install-flyctl   # flyctl が未インストールの場合のみ
   ```
 - Fly.io で利用するリージョンの決定（本プロジェクトでは `nrt` を想定）
 
 ## 初期セットアップ
-1. `flyctl auth login` で Fly.io にログインします。
+1. `mise run fly-login` で Fly.io にログインします。
 2. `fly.toml` の `app` 名が一意であることを確認し、必要に応じて変更します。
 3. 既存構成を用いてアプリを作成します。
    ```bash
